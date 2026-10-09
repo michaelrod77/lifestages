@@ -555,6 +555,22 @@ public class LifeStagesClientTest implements FabricClientGameTest {
 			ctx.waitTicks(5);
 			ctx.takeScreenshot("07_journal");
 			ctx.runOnClient(mc -> mc.setScreenAndShow(null));
+			check(server.computeOnServer(s -> {
+				var p = s.getPlayerList().getPlayers().get(0);
+				var d = Life.of(p);
+				d.lookingForParent = true;
+				Life.save(p, d);
+				dev.lifestages.life.Family.claimIfLooking(p, p);
+				return Life.of(p).lookingForParent && !Life.of(p).parents.contains(p.getUUID());
+			}), "a child looking for a parent was able to adopt themselves");
+			ctx.waitTicks(10);
+			check(ctx.computeOnClient(mc -> Life.of(mc.player).lookingForParent), "looking for a new parent did not sync to the client");
+			server.runOnServer(s -> {
+				var p = s.getPlayerList().getPlayers().get(0);
+				var d = Life.of(p);
+				d.lookingForParent = false;
+				Life.save(p, d);
+			});
 
 			// 8. Blocks and items.
 			server.runCommand("setblock ~2 ~ ~ lifestages:crib");

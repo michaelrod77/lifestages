@@ -29,10 +29,10 @@ public class JournalScreen extends Screen {
 		LifeData d = data();
 		int y = height / 2 + 70;
 		if (d.stage().atMost(Stage.CHILD)) {
-			addRenderableWidget(Button.builder(carryLabel(d.allowCarry), b -> {
-				boolean on = !data().allowCarry;
+			addRenderableWidget(Button.builder(parentLabel(d.lookingForParent), b -> {
+				boolean on = !data().lookingForParent;
 				ClientPlayNetworking.send(new Payloads.Act(on ? Payloads.Action.ALLOW_CARRY_ON : Payloads.Action.ALLOW_CARRY_OFF, 0));
-				b.setMessage(carryLabel(on));
+				b.setMessage(parentLabel(on));
 			}).bounds(width / 2 - 100, y, 200, 20).build());
 		}
 		if (d.stage().canParent()) {
@@ -44,8 +44,8 @@ public class JournalScreen extends Screen {
 		}
 	}
 
-	private static Component carryLabel(boolean on) {
-		return Component.literal("Others can carry me: " + (on ? "On" : "Off"));
+	private static Component parentLabel(boolean on) {
+		return Component.literal("Looking for new parent: " + (on ? "On" : "Off"));
 	}
 
 	private static Component lookingLabel(boolean on) {

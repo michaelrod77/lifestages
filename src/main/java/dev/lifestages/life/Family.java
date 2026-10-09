@@ -53,12 +53,12 @@ public final class Family {
 		return out;
 	}
 
-	/** Online parents who are old enough to look after a baby. */
+	/** Online parents old enough to have picked this child up: teenager and older, including Mom stepping back. */
 	public static List<ServerPlayer> caregivers(ServerPlayer child) {
 		List<ServerPlayer> out = new ArrayList<>();
 		for (ServerPlayer p : online(child.level().getServer(), Life.of(child).parents)) {
 			LifeData pd = Life.of(p);
-			if (pd.started && !pd.isGhost() && pd.stage().canParent()) {
+			if (pd.started && !pd.isGhost() && pd.stage().canCarry()) {
 				out.add(p);
 			}
 		}
@@ -127,6 +127,41 @@ public final class Family {
 		}
 		ServerPlayer parent = Life.stage(from).canParent() ? from : player;
 		ServerPlayer child = parent == from ? player : from;
+		link(parent, child);
+	}
+
+	/**
+	 * A child who is looking for a new parent is adopted by the teenager or grown-up who just picked them up.
+	 * One adoption turns the search off. If they already have as many parents as allowed, the oldest link makes room.
+	 */
+	public static void claimIfLooking(ServerPlayer parent, ServerPlayer child) {
+		LifeData cd = Life.of(child);
+		if (!cd.lookingForParent || parent == child || !Life.stage(parent).canCarry() || isParentOf(parent, child)) {
+			return;
+		}
+		long young = online(parent.level().getServer(), Life.of(parent).children).stream()
+				.filter(c -> Life.stage(c).atMost(Stage.CHILD)).count();
+		if (young >= LifeConfig.get().maxChildrenPerParent) {
+			parent.sendSystemMessage(Component.literal("You already look after " + LifeConfig.get().maxChildrenPerParent + " children.")
+					.withStyle(ChatFormatting.RED));
+			return;
+		}
+		int max = LifeConfig.get().maxParentsPerChild;
+		while (Life.of(child).parents.size() >= max && !Life.of(child).parents.isEmpty()) {
+			UUID oldId = Life.of(child).parents.get(0);
+			ServerPlayer old = child.level().getServer().getPlayerList().getPlayer(oldId);
+			if (old != null) {
+				leave(child, old);
+				old.sendSystemMessage(Component.literal(child.getName().getString() + " found a new parent.").withStyle(ChatFormatting.GRAY));
+			} else {
+				LifeData fresh = Life.of(child);
+				fresh.parents.remove(oldId);
+				Life.save(child, fresh);
+			}
+		}
+		LifeData ready = Life.of(child);
+		ready.lookingForParent = false;
+		Life.save(child, ready);
 		link(parent, child);
 	}
 

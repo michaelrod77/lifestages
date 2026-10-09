@@ -3,7 +3,8 @@
 	"package": "dev.lifestages.mixin.client",
 	"compatibilityLevel": "JAVA_25",
 	"client": [
-		"PlayerModelMixin"
+		"PlayerModelMixin",
+		"NameTagMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -33,14 +33,14 @@ Every player needs the mod; the server refuses players without it.
 | Z (hold) | Emote wheel: cry, fart, be cute, poop (Newborn to Preschooler). Release in the middle to repeat the last emote, so tapping Z cries again. |
 | J | Growth Journal: stage, age, goals, family, settings |
 | U | Ask the player you're looking at to be family |
-| Right-click (empty hand) | Pick up your own baby or child. Sneak + right-click still picks up a child who isn't yours. Two newborns or infants fit at once, older children one at a time. Your hands stay free; the baby can't reach anything. Right-click a changing table while carrying them to put them on it, or a crib to lay an NPC baby down. |
+| Right-click (empty hand) | Pick up your own baby or child, or a child who turned on "Looking for new parent" (that pickup makes you their parent). Sneak + right-click picks up any other child. Two newborns or infants fit at once, older children one at a time. Your hands stay free; the baby can't reach anything. Right-click a changing table while carrying them to put them on it, or a crib to lay an NPC baby down. |
 | V | Put down the baby in your carrier (or, as a toddler, ask to get down) |
 | Jump x6 | Wriggle free when carried (Toddler and older) |
 | B / K / R | Ghost: Boo, flicker a lamp, be reborn |
 
 ## Starting a life
 
-On first join you choose Adult (you start as a Young Adult, age 18, listed as looking for a baby so new babies can pick you as their parent) or Baby. Each time a baby connects with you, a starter chest appears beside you with a crib, 32 diapers, a rattle, 64 milk bottles, a trash can and a music box. You can look after up to 4 babies, so you get up to 4 of those chests. A Baby can pick a parent from the grown-ups looking for a baby ("Search for parents" checks again if nobody is listed yet), and picks which of the six Moms will look after them, or "Surprise me". Each player's Mom builds her house clear of everyone else's.
+On first join you choose Adult (you start as a Young Adult, age 18, listed as looking for a baby so new babies can pick you as their parent) or Baby. Each time a baby connects with you, a starter chest appears beside you with a crib, 32 diapers, a rattle, 64 milk bottles, a trash can and a music box. You can look after up to 4 babies, so you get up to 4 of those chests. A Baby can pick a parent from the grown-ups looking for a baby ("Search for parents" checks again if nobody is listed yet), and picks which of the six Moms will look after them, or "Surprise me". Each player's Mom builds her house clear of everyone else's. A child who already has a Mom can open the Journal (J) and turn on "Looking for new parent". The next teenager or grown-up who picks them up becomes their parent, and Mom steps back while that parent is nearby. Anyone old enough can always pick a child up.
 
 ## Raising an NPC baby
 

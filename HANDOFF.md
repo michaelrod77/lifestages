@@ -127,7 +127,14 @@ cp build/libs/lifestages-0.1.0.jar "$USERPROFILE/curseforge/minecraft/Instances/
   - Renderers: Mom, NPC baby, player overlay (including the carrier).
   - `PlayerModelMixin`: baby proportions.
 
-## State of the last round (round 14)
+## State of the last round (round 15)
+
+| Change | Status |
+|---|---|
+| Carried babies hide their name tag in first person | Done, not screenshot-checked (the name is absent) |
+| Journal button is "Looking for new parent". The next teenager or grown-up who picks that child up becomes their parent, and anyone old enough can always pick a child up | Done, self-adopt guard tested; two-player pickup not covered by the automated test |
+
+## State of the previous round (round 14)
 
 | Change | Status |
 |---|---|

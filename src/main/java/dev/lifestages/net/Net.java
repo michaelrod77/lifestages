@@ -67,8 +67,15 @@ public final class Net {
 				}
 			}
 			case Action.ALLOW_CARRY_ON, Action.ALLOW_CARRY_OFF -> {
-				d.allowCarry = action == Action.ALLOW_CARRY_ON;
+				if (!d.started || !d.stage().atMost(dev.lifestages.life.Stage.CHILD)) {
+					break;
+				}
+				d.lookingForParent = action == Action.ALLOW_CARRY_ON;
+				d.allowCarry = true;
 				Life.save(player, d);
+				player.sendSystemMessage(net.minecraft.network.chat.Component.literal(d.lookingForParent
+						? "The next teenager or grown-up who picks you up will be your parent. Mom steps back while they're with you."
+						: "You're no longer looking for a new parent.").withStyle(net.minecraft.ChatFormatting.GRAY));
 			}
 			case Action.SEARCH_PARENTS -> {
 				if (!d.started || d.pendingChoice != 0) {

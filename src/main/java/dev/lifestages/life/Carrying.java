@@ -91,8 +91,10 @@ public final class Carrying {
 		if (hand != InteractionHand.MAIN_HAND || !player.getMainHandItem().isEmpty() || !(target instanceof Player child)) {
 			return InteractionResult.PASS;
 		}
-		boolean mine = Family.isParentOf(player, child) && Life.of(player).started && Life.stage(player).canCarry();
-		if (!mine && !player.isShiftKeyDown()) {
+		boolean grown = Life.of(player).started && Life.stage(player).canCarry();
+		boolean mine = Family.isParentOf(player, child) && grown;
+		boolean adopting = Life.of(child).lookingForParent && grown;
+		if (!mine && !adopting && !player.isShiftKeyDown()) {
 			return InteractionResult.PASS;
 		}
 		if (level.isClientSide()) {
@@ -116,21 +118,28 @@ public final class Carrying {
 		if (!cd.stage().atMost(Stage.CHILD) || Life.age(child) >= LifeConfig.get().carryAgeLimit) {
 			return child.getName().getString() + " is too big to carry.";
 		}
-		if (carrier.isPassenger() || child.isPassenger()) {
+		if (carrier.isPassenger()) {
+			return "Your arms are full.";
+		}
+		// A child looking for a parent can be taken out of Mom's arms. Anyone else already being carried stays put.
+		if (child.isPassenger() && !(cd.lookingForParent && Moms.isMom(child.getVehicle()))) {
 			return "Your arms are full.";
 		}
 		if (!canHold(carrier, child)) {
 			return carrier.getPassengers().size() >= 2 ? "Your carrier is full." : "Only two newborns or infants fit in the carrier at once.";
-		}
-		if (!Family.isParentOf(carrier, child) && !cd.allowCarry) {
-			return child.getName().getString() + " doesn't let strangers pick them up.";
 		}
 		return null;
 	}
 
 	public static void pickUp(Entity carrier, ServerPlayer child) {
 		boolean running = child.isSprinting() || child.getDeltaMovement().horizontalDistanceSqr() > 0.02;
+		if (Moms.isMom(child.getVehicle())) {
+			child.stopRiding();
+		}
 		if (child.startRiding(carrier, true, true)) {
+			if (carrier instanceof ServerPlayer parent) {
+				Family.claimIfLooking(parent, child);
+			}
 			if (carrier instanceof Player p) {
 				setSlow(p, true);
 			}
