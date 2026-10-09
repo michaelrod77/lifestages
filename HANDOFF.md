@@ -106,7 +106,7 @@ cp build/libs/lifestages-0.1.0.jar "$USERPROFILE/curseforge/minecraft/Instances/
 - **`life/`:** the core systems.
   - `Stage` (the 11 stages) and `LifeData` (per-player synced attachment; codecs grouped at 16 fields or fewer). `Life` handles access.
   - `LifeManager` (the server tick: aging, naps, old age).
-  - `Choices` (Adult/Baby/Elderly/Ghost, Mom pick, adult starter kit, `lookingForBaby` defaults to on).
+  - `Choices` (Adult/Baby/Elderly/Ghost, Mom pick, `lookingForBaby` defaults to on). A baby connection places a `StarterChest` (up to 4).
   - `Feeding` (only newborns are milk-only).
   - `Carrying` (the baby carrier; two newborns or infants at once).
   - `Family`, `Emotes`, `Bodily`, `Diapers`, `Cribs`, `Birthdays` (presents; Adult gets 4 Baby Spawn Eggs), `Growth`, `Ghosts`, `WillChest`.
@@ -127,7 +127,15 @@ cp build/libs/lifestages-0.1.0.jar "$USERPROFILE/curseforge/minecraft/Instances/
   - Renderers: Mom, NPC baby, player overlay (including the carrier).
   - `PlayerModelMixin`: baby proportions.
 
-## State of the last round (round 12)
+## State of the last round (round 13)
+
+| Change | Status |
+|---|---|
+| Your own baby: empty-hand right-click picks them up (sneak is only for a child who isn't yours) | Done, tested |
+| Right-click a changing table while carrying a baby to put them on it | Done, tested |
+| Adults no longer start with nursery items. Each baby connection places a chest: 1 crib, 32 diapers, 1 rattle, 64 milk bottles, 1 trash can, 1 music box. Up to 4 chests | Done, tested |
+
+## State of the previous round (round 12)
 
 | Change | Status |
 |---|---|

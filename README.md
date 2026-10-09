@@ -33,14 +33,14 @@ Every player needs the mod; the server refuses players without it.
 | Z (hold) | Emote wheel: cry, fart, be cute, poop (Newborn to Preschooler). Release in the middle to repeat the last emote, so tapping Z cries again. |
 | J | Growth Journal: stage, age, goals, family, settings |
 | U | Ask the player you're looking at to be family |
-| Sneak + right-click (empty hand) | Put a baby or child in your baby carrier (two newborns or infants fit at once, older children one at a time). Your hands stay free; the baby can't reach anything. Look at a baby for what you can do with what you're holding. |
+| Right-click (empty hand) | Pick up your own baby or child. Sneak + right-click still picks up a child who isn't yours. Two newborns or infants fit at once, older children one at a time. Your hands stay free; the baby can't reach anything. Right-click a changing table while carrying them to put them on it, or a crib to lay an NPC baby down. |
 | V | Put down the baby in your carrier (or, as a toddler, ask to get down) |
 | Jump x6 | Wriggle free when carried (Toddler and older) |
 | B / K / R | Ghost: Boo, flicker a lamp, be reborn |
 
 ## Starting a life
 
-On first join you choose Adult (you start as a Young Adult, age 18, listed as looking for a baby so new babies can pick you as their parent, with a starter nursery: a crib, changing table, music box, trash can, 8 milk bottles, 8 clean diapers and a rattle) or Baby. A Baby can pick a parent from the grown-ups looking for a baby ("Search for parents" checks again if nobody is listed yet), and picks which of the six Moms will look after them, or "Surprise me". Each player's Mom builds her house clear of everyone else's.
+On first join you choose Adult (you start as a Young Adult, age 18, listed as looking for a baby so new babies can pick you as their parent) or Baby. Each time a baby connects with you, a starter chest appears beside you with a crib, 32 diapers, a rattle, 64 milk bottles, a trash can and a music box. You can look after up to 4 babies, so you get up to 4 of those chests. A Baby can pick a parent from the grown-ups looking for a baby ("Search for parents" checks again if nobody is listed yet), and picks which of the six Moms will look after them, or "Surprise me". Each player's Mom builds her house clear of everyone else's.
 
 ## Raising an NPC baby
 
@@ -48,8 +48,8 @@ When you reach Adult, your birthday present holds four Baby Spawn Eggs. Use one 
 
 - Feed it: a newborn only drinks milk; after that it eats just about anything. Anything sugary gives a sugar rush, and it runs off, sometimes toward water, drops or monsters.
 - Change it with a clean diaper when it's dirty.
-- Let it sleep: a tired baby naps where it is, or sneak + right-click to pick it up and right-click a crib to lay it down (cribs rest it twice as fast).
-- Cuddle it (empty hand) or play with a rattle or teddy bear to stop the crying.
+- Let it sleep: a tired baby naps where it is, or right-click with an empty hand to pick it up and right-click a crib to lay it down (cribs rest it twice as fast). Right-click a changing table while carrying them to put them on it.
+- Cuddle someone else's baby (empty hand) or play with a rattle or teddy bear to stop the crying. Your own baby is picked up instead.
 - Keep it safe: monsters go after babies, and babies can fall or drown. A baby is never lost: if it would have been badly hurt, it's rushed home and you hear about the close call.
 
 It grows up through every stage to a Young Adult, each stage as long as a player's. Care sets the pace: fed, clean (while in diapers), rested and loved (cuddles, play, carrying) each count; all four make it grow twice as fast, poor care slows it, and neglect stops it until you put things right. The panel shows the care level and a bar to the next stage. Preschoolers are out of diapers; children stay up all day and go home to sleep at night; teenagers are too big to carry. At Young Adult they're all grown up: no more needs, and they give you a thank-you present.

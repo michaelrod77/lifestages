@@ -70,7 +70,9 @@ public final class Choices {
 				player.sendSystemMessage(Component.literal("You begin life as a Young Adult, age 18.").withStyle(ChatFormatting.GOLD));
 				player.sendSystemMessage(Component.literal("New babies can choose you as their parent (turn this off in the Journal, J).")
 						.withStyle(ChatFormatting.GRAY));
-				starterKit(player);
+				player.sendSystemMessage(Component.literal("When a baby connects with you, a starter chest appears beside you: "
+						+ "a crib, 32 diapers, a rattle, 64 milk bottles, a trash can and a music box. You can look after up to "
+						+ LifeConfig.get().maxChildrenPerParent + " babies.").withStyle(ChatFormatting.GRAY));
 			}
 			case ELDERLY -> {
 				player.giveExperienceLevels(5);
@@ -81,27 +83,6 @@ public final class Choices {
 			default -> {
 			}
 		}
-	}
-
-	/**
-	 * Everything for a nursery, for adults starting out: a crib, a changing table, a music box and a trash can,
-	 * plus milk bottles, clean diapers and a rattle for the baby they'll have one day.
-	 */
-	private static void starterKit(ServerPlayer player) {
-		var give = new ItemStack[] {
-				new ItemStack(dev.lifestages.registry.ModBlocks.CRIB),
-				new ItemStack(dev.lifestages.registry.ModBlocks.CHANGING_TABLE),
-				new ItemStack(dev.lifestages.registry.ModBlocks.MUSIC_BOX),
-				new ItemStack(dev.lifestages.registry.ModBlocks.TRASH_CAN),
-				new ItemStack(ModItems.MILK_BOTTLE, 8),
-				new ItemStack(ModItems.CLEAN_DIAPER, 8),
-				new ItemStack(ModItems.RATTLE),
-		};
-		for (ItemStack stack : give) {
-			dev.lifestages.util.Give.item(player, stack);
-		}
-		player.sendSystemMessage(Component.literal("You've got a starter nursery: a crib, changing table, music box and trash can, "
-				+ "with milk bottles, diapers and a rattle. Reach Adult for a present with Baby Spawn Eggs!").withStyle(ChatFormatting.GRAY));
 	}
 
 	private static void startBaby(ServerPlayer baby, LifeData d, UUID parentId) {

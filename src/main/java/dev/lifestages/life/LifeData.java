@@ -58,6 +58,8 @@ public final class LifeData {
 	public List<UUID> children = new ArrayList<>();
 	public boolean allowCarry;
 	public boolean lookingForBaby;
+	/** Starter chests already placed for this player's babies. Capped at the child limit. */
+	public int starterPacks;
 
 	public Stage stage() {
 		return Stage.of(stage);
@@ -176,6 +178,7 @@ public final class LifeData {
 		d.children = new ArrayList<>(children);
 		d.allowCarry = allowCarry;
 		d.lookingForBaby = lookingForBaby;
+		d.starterPacks = starterPacks;
 		d.momAssigned = momAssigned;
 		d.momLook = momLook;
 		d.momDeathAge = momDeathAge;
@@ -232,12 +235,13 @@ public final class LifeData {
 		).apply(i, Fate::new));
 	}
 
-	private record Family(List<UUID> parents, List<UUID> children, boolean allowCarry, boolean lookingForBaby) {
+	private record Family(List<UUID> parents, List<UUID> children, boolean allowCarry, boolean lookingForBaby, int starterPacks) {
 		static final Codec<Family> CODEC = RecordCodecBuilder.create(i -> i.group(
 				UUIDUtil.CODEC.listOf().fieldOf("parents").forGetter(Family::parents),
 				UUIDUtil.CODEC.listOf().fieldOf("children").forGetter(Family::children),
 				Codec.BOOL.fieldOf("allow_carry").forGetter(Family::allowCarry),
-				Codec.BOOL.fieldOf("looking_for_baby").forGetter(Family::lookingForBaby)
+				Codec.BOOL.fieldOf("looking_for_baby").forGetter(Family::lookingForBaby),
+				Codec.INT.optionalFieldOf("starter_packs", 0).forGetter(Family::starterPacks)
 		).apply(i, Family::new));
 	}
 
@@ -265,7 +269,7 @@ public final class LifeData {
 			Growth.CODEC.fieldOf("growth").forGetter(d -> new Growth(d.stage, d.stageTicks, d.milk, d.food, d.naps, d.nights, d.napTicks, d.lastNightDay)),
 			Body.CODEC.fieldOf("body").forGetter(d -> new Body(d.diaperDirty, d.diaperTicks, d.feedsSincePoop, d.sugarTicks, d.stinkyTicks, d.diaperOn, d.rumbleTicks)),
 			Fate.CODEC.fieldOf("fate").forGetter(d -> new Fate(d.started, d.pendingChoice, d.lastWasGhost, d.ghostTicks, d.lifespanTicks, d.bonusTicks, d.presents)),
-			Family.CODEC.fieldOf("family").forGetter(d -> new Family(d.parents, d.children, d.allowCarry, d.lookingForBaby)),
+			Family.CODEC.fieldOf("family").forGetter(d -> new Family(d.parents, d.children, d.allowCarry, d.lookingForBaby, d.starterPacks)),
 			Mom.CODEC.optionalFieldOf("mom", new Mom(false, 0, 0, false)).forGetter(d -> new Mom(d.momAssigned, d.momLook, d.momDeathAge, d.momDead)),
 			House.CODEC.optionalFieldOf("house", new House(0, 0, 0, 0, 0, 1)).forGetter(d -> new House(d.houseState, d.houseX, d.houseY, d.houseZ, d.houseStep, d.houseVersion))
 	).apply(i, (g, b, f, fam, mom, house) -> {
@@ -296,6 +300,7 @@ public final class LifeData {
 		d.children = new ArrayList<>(fam.children);
 		d.allowCarry = fam.allowCarry;
 		d.lookingForBaby = fam.lookingForBaby;
+		d.starterPacks = fam.starterPacks;
 		d.momAssigned = mom.assigned;
 		d.momLook = mom.look;
 		d.momDeathAge = mom.deathAge;

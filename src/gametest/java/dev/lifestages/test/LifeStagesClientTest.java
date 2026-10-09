@@ -594,8 +594,30 @@ public class LifeStagesClientTest implements FabricClientGameTest {
 			check(server.computeOnServer(s -> {
 				var p = s.getPlayerList().getPlayers().get(0);
 				var babies = p.level().getEntitiesOfClass(dev.lifestages.entity.BabyEntity.class, p.getBoundingBox().inflate(8));
-				return babies.size() == 1 && p.getUUID().equals(babies.get(0).ownerId()) && babies.get(0).getCustomName() != null;
-			}), "the Baby Spawn Egg did not hatch a baby with this player as parent");
+				if (babies.size() != 1 || !p.getUUID().equals(babies.get(0).ownerId()) || babies.get(0).getCustomName() == null) {
+					return false;
+				}
+				int milk = 0, diapers = 0, cribs = 0, rattles = 0, trash = 0, music = 0;
+				var area = net.minecraft.core.BlockPos.betweenClosed(p.blockPosition().offset(-4, -1, -4), p.blockPosition().offset(4, 2, 4));
+				for (var pos : area) {
+					if (!p.level().getBlockState(pos).is(net.minecraft.world.level.block.Blocks.CHEST)) {
+						continue;
+					}
+					if (!(p.level().getBlockEntity(pos) instanceof net.minecraft.world.Container chest)) {
+						continue;
+					}
+					for (int i = 0; i < chest.getContainerSize(); i++) {
+						var st = chest.getItem(i);
+						if (st.is(dev.lifestages.registry.ModItems.MILK_BOTTLE)) milk += st.getCount();
+						else if (st.is(dev.lifestages.registry.ModItems.CLEAN_DIAPER)) diapers += st.getCount();
+						else if (st.is(ModBlocks.CRIB.asItem())) cribs += st.getCount();
+						else if (st.is(dev.lifestages.registry.ModItems.RATTLE)) rattles += st.getCount();
+						else if (st.is(ModBlocks.TRASH_CAN.asItem())) trash += st.getCount();
+						else if (st.is(ModBlocks.MUSIC_BOX.asItem())) music += st.getCount();
+					}
+				}
+				return milk == 64 && diapers == 32 && cribs == 1 && rattles == 1 && trash == 1 && music == 1;
+			}), "the Baby Spawn Egg did not hatch a baby with a starter chest");
 			check(server.computeOnServer(s -> {
 				var p = s.getPlayerList().getPlayers().get(0);
 				var level = (ServerLevel) p.level();
@@ -611,20 +633,32 @@ public class LifeStagesClientTest implements FabricClientGameTest {
 				p.setItemInHand(main, new net.minecraft.world.item.ItemStack(dev.lifestages.registry.ModItems.CLEAN_DIAPER));
 				baby.interact(p, main, baby.position());
 				boolean changed = !baby.dirty() && p.getInventory().contains(new net.minecraft.world.item.ItemStack(dev.lifestages.registry.ModItems.DIRTY_DIAPER));
-				// carry to a crib, where a tired baby falls asleep
+				// This stretch of the test is still a toddler. Pickup without sneaking is for an adult.
+				var life = Life.of(p);
+				int previousStage = life.stage;
+				life.stage = Stage.YOUNG_ADULT.ordinal();
+				Life.save(p, life);
 				p.setItemInHand(main, net.minecraft.world.item.ItemStack.EMPTY);
-				p.setShiftKeyDown(true);
-				baby.interact(p, main, baby.position());
 				p.setShiftKeyDown(false);
+				baby.interact(p, main, baby.position());
 				boolean carried = baby.getVehicle() == p;
+				var table = p.blockPosition().west(2);
+				level.setBlockAndUpdate(table, ModBlocks.CHANGING_TABLE.defaultBlockState());
+				p.gameMode.useItemOn(p, level, p.getMainHandItem(), main,
+						new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(table), net.minecraft.core.Direction.UP, table, false));
+				boolean onTable = baby.getVehicle() == null && baby.position().distanceToSqr(net.minecraft.world.phys.Vec3.atCenterOf(table)) < 2.5;
+				baby.interact(p, main, baby.position());
 				var crib = p.blockPosition().east(2);
 				level.setBlockAndUpdate(crib, ModBlocks.CRIB.defaultBlockState());
 				baby.setEnergy(40);
 				p.gameMode.useItemOn(p, level, p.getMainHandItem(), main,
 						new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(crib), net.minecraft.core.Direction.UP, crib, false));
 				boolean inCrib = baby.getVehicle() == null && baby.blockPosition().equals(crib) && baby.asleep();
-				return fed && changed && carried && inCrib;
-			}), "caring for the NPC baby (feed, change, carry to the crib) did not work");
+				life = Life.of(p);
+				life.stage = previousStage;
+				Life.save(p, life);
+				return fed && changed && carried && onTable && inCrib;
+			}), "caring for the NPC baby (feed, change, carry, changing table, crib) did not work");
 			ctx.waitTicks(20);
 			ctx.runOnClient(mc -> mc.options.setCameraType(CameraType.THIRD_PERSON_BACK));
 			ctx.waitTicks(10);
@@ -797,13 +831,13 @@ public class LifeStagesClientTest implements FabricClientGameTest {
 			ctx.waitTicks(20);
 			check(server.computeOnServer(s -> Life.stage(s.getPlayerList().getPlayers().get(0))) == Stage.YOUNG_ADULT, "respawn as Adult failed");
 
-			// 12. Adults start with a nursery kit, and ordinary items work (a fishing rod casts).
+			// 12. Adults start with an empty inventory (the nursery arrives as a chest per baby), and ordinary items work.
 			check(server.computeOnServer(s -> {
 				var inv = s.getPlayerList().getPlayers().get(0).getInventory();
-				return inv.contains(new net.minecraft.world.item.ItemStack(ModBlocks.CRIB)) && inv.contains(new net.minecraft.world.item.ItemStack(ModBlocks.CHANGING_TABLE))
-						&& inv.contains(new net.minecraft.world.item.ItemStack(ModBlocks.MUSIC_BOX)) && inv.contains(new net.minecraft.world.item.ItemStack(ModBlocks.TRASH_CAN))
-						&& inv.contains(new net.minecraft.world.item.ItemStack(dev.lifestages.registry.ModItems.MILK_BOTTLE));
-			}), "an Adult did not start with the nursery kit");
+				return !inv.contains(new net.minecraft.world.item.ItemStack(ModBlocks.CRIB))
+						&& !inv.contains(new net.minecraft.world.item.ItemStack(dev.lifestages.registry.ModItems.MILK_BOTTLE))
+						&& !inv.contains(new net.minecraft.world.item.ItemStack(dev.lifestages.registry.ModItems.CLEAN_DIAPER));
+			}), "an Adult started with nursery items in their inventory");
 			check(server.computeOnServer(s -> {
 				var p = s.getPlayerList().getPlayers().get(0);
 				var rod = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.FISHING_ROD);
@@ -869,7 +903,7 @@ public class LifeStagesClientTest implements FabricClientGameTest {
 					level.addFreshEntity(b);
 					babies.add(b);
 				}
-				p.setShiftKeyDown(true);
+				p.setShiftKeyDown(false);
 				babies.get(0).interact(p, main, babies.get(0).position());
 				babies.get(1).interact(p, main, babies.get(1).position());
 				babies.get(2).interact(p, main, babies.get(2).position());

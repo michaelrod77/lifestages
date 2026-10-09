@@ -70,9 +70,29 @@ public final class Carrying {
 		return carrier.getFirstPassenger() instanceof Player;
 	}
 
-	/** UseEntityCallback: sneak + right-click a child with an empty hand to pick them up. */
+	/** Puts the baby this player is carrying onto a changing table. */
+	public static void putOnChangingTable(Player carrier, net.minecraft.core.BlockPos table) {
+		Entity passenger = carrier.getFirstPassenger();
+		if (!(passenger instanceof Player) && !(passenger instanceof dev.lifestages.entity.BabyEntity)) {
+			return;
+		}
+		drop(carrier);
+		passenger.teleportTo(table.getX() + 0.5, table.getY() + 0.9, table.getZ() + 0.5);
+		if (passenger instanceof dev.lifestages.entity.BabyEntity baby) {
+			baby.getNavigation().stop();
+		}
+	}
+
+	/**
+	 * UseEntityCallback: right-click your own child with an empty hand to pick them up. Sneak is still required
+	 * for a child who isn't yours.
+	 */
 	public static InteractionResult onUseEntity(Player player, Level level, InteractionHand hand, Entity target) {
-		if (hand != InteractionHand.MAIN_HAND || !player.isShiftKeyDown() || !player.getMainHandItem().isEmpty() || !(target instanceof Player child)) {
+		if (hand != InteractionHand.MAIN_HAND || !player.getMainHandItem().isEmpty() || !(target instanceof Player child)) {
+			return InteractionResult.PASS;
+		}
+		boolean mine = Family.isParentOf(player, child) && Life.of(player).started && Life.stage(player).canCarry();
+		if (!mine && !player.isShiftKeyDown()) {
 			return InteractionResult.PASS;
 		}
 		if (level.isClientSide()) {

@@ -71,7 +71,7 @@ public final class Hud {
 		if (rider != null) {
 			int count = mc.player.getPassengers().size();
 			String who = count > 1 ? "two babies" : rider.getName().getString();
-			String extra = rider instanceof dev.lifestages.entity.BabyEntity ? " · crib: lay down" : "";
+			String extra = rider instanceof dev.lifestages.entity.BabyEntity ? " · crib: lay down · changing table" : " · changing table";
 			String text = "Carrying " + who + " · V: put down" + extra;
 			int x = Math.max(cx - mc.font.width(text) / 2, 156); // clear of the baby panel on the left
 			g.text(mc.font, text, x, carrierLine, 0xFFE8D8F0);
@@ -107,7 +107,10 @@ public final class Hud {
 		} else if (npc && (held.is(dev.lifestages.registry.ModItems.RATTLE) || held.is(dev.lifestages.registry.ModBlocks.TEDDY_BEAR.asItem()))) {
 			tip = "Right-click: play with " + name;
 		} else if (held.isEmpty()) {
-			tip = "Sneak + right-click: carry " + name + (npc ? " · Right-click: cuddle" : "");
+			boolean mine = npc ? mc.player.getUUID().equals(((dev.lifestages.entity.BabyEntity) target).ownerId())
+					: dev.lifestages.life.Family.isParentOf(mc.player, (net.minecraft.world.entity.player.Player) target);
+			tip = mine && me.stage().canCarry() ? "Right-click: pick up " + name
+					: "Sneak + right-click: carry " + name + (npc ? " · Right-click: cuddle" : "");
 		} else {
 			tip = "Hold a milk bottle, food or a clean diaper to look after " + name;
 		}

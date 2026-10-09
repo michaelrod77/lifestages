@@ -132,7 +132,8 @@ public final class Family {
 
 	public static void link(ServerPlayer parent, ServerPlayer child) {
 		LifeData pd = Life.of(parent), cd = Life.of(child);
-		if (!pd.children.contains(child.getUUID())) {
+		boolean newly = !pd.children.contains(child.getUUID());
+		if (newly) {
 			pd.children.add(child.getUUID());
 		}
 		if (!cd.parents.contains(parent.getUUID())) {
@@ -140,10 +141,14 @@ public final class Family {
 		}
 		Life.save(parent, pd);
 		Life.save(child, cd);
+		if (newly) {
+			StarterChest.give(parent, child.getName().getString());
+		}
 		parent.sendSystemMessage(Component.literal("You are now " + child.getName().getString() + "'s parent!").withStyle(ChatFormatting.LIGHT_PURPLE));
 		parent.sendSystemMessage(Component.literal("Looking after " + child.getName().getString() + ": right-click them holding a milk bottle "
-				+ "(or food, past Newborn) to feed them, or a clean diaper to change them. Sneak + right-click with an empty hand to put them "
-				+ "in your baby carrier (press V to put them down). When they cry, an arrow points to them. Look at them for tips.")
+				+ "(or food, past Newborn) to feed them, or a clean diaper to change them. Right-click with an empty hand to put them "
+				+ "in your baby carrier (press V to put them down), and right-click a changing table to put them on it. "
+				+ "When they cry, an arrow points to them. Look at them for tips.")
 				.withStyle(ChatFormatting.GRAY));
 		child.sendSystemMessage(Component.literal(parent.getName().getString() + " is now your parent!").withStyle(ChatFormatting.LIGHT_PURPLE));
 		ModAdvancements.award(parent, "proud_parent");

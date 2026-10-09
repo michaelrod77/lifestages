@@ -1,6 +1,7 @@
 package dev.lifestages.entity;
 
 import dev.lifestages.life.Feeding;
+import dev.lifestages.life.Life;
 import dev.lifestages.life.Stage;
 import dev.lifestages.net.Net;
 import dev.lifestages.registry.ModBlocks;
@@ -143,6 +144,7 @@ public class BabyEntity extends PathfinderMob {
 		setCustomName(Component.literal(NAMES[random.nextInt(NAMES.length)]));
 		setCustomNameVisible(true);
 		applyStage();
+		dev.lifestages.life.StarterChest.give(parent, getName().getString());
 	}
 
 	public Stage stage() {
@@ -507,7 +509,9 @@ public class BabyEntity extends PathfinderMob {
 		}
 		Stage s = stage();
 		if (stack.isEmpty() && hand == InteractionHand.MAIN_HAND) {
-			if (player.isShiftKeyDown()) {
+			boolean mine = player.getUUID().equals(ownerId());
+			boolean grown = Life.of(player).started && Life.stage(player).canCarry();
+			if (player.isShiftKeyDown() || (mine && grown)) {
 				return carry(player);
 			}
 			// a cuddle (or, for big kids, a hug)
@@ -596,7 +600,7 @@ public class BabyEntity extends PathfinderMob {
 		level.sendParticles(ParticleTypes.HEART, getX(), getEyeY() + 0.3, getZ(), 2, 0.2, 0.1, 0.2, 0.0);
 	}
 
-	/** Sneak + right-click with an empty hand: pick the baby up, or put them down. */
+	/** Empty right-click (your own baby) or sneak + right-click: pick the baby up, or put them down. */
 	private InteractionResult carry(Player player) {
 		if (getVehicle() == player) {
 			stopRiding();

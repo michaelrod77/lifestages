@@ -138,6 +138,15 @@ public class LifeStages implements ModInitializer {
 				}
 				return InteractionResult.SUCCESS;
 			}
+			// Carrying a baby: right-click a changing table to set them down on it.
+			var passenger = player.getFirstPassenger();
+			if ((passenger instanceof dev.lifestages.entity.BabyEntity || passenger instanceof Player)
+					&& level.getBlockState(hit.getBlockPos()).is(dev.lifestages.registry.ModBlocks.CHANGING_TABLE)) {
+				if (!level.isClientSide()) {
+					Carrying.putOnChangingTable(player, hit.getBlockPos());
+				}
+				return InteractionResult.SUCCESS;
+			}
 			if (player.isCreative() || player.isSpectator()) {
 				return InteractionResult.PASS;
 			}

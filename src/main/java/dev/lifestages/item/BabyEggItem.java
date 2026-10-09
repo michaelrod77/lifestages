@@ -44,7 +44,7 @@ public class BabyEggItem extends Item {
 		level.sendParticles(net.minecraft.core.particles.ParticleTypes.HEART, at.getX() + 0.5, at.getY() + 0.8, at.getZ() + 0.5, 6, 0.4, 0.3, 0.4, 0.0);
 		parent.sendSystemMessage(Component.literal("Congratulations! Meet your baby, " + baby.getName().getString() + "!").withStyle(ChatFormatting.LIGHT_PURPLE));
 		parent.sendSystemMessage(Component.literal("Keep them fed (milk bottles), clean (clean diapers) and rested (a crib), and keep them safe. "
-				+ "Sneak + right-click with an empty hand to pick them up; right-click a crib while carrying them to lay them down.")
+				+ "Right-click with an empty hand to pick them up; right-click a crib to lay them down, or a changing table to put them on it.")
 				.withStyle(ChatFormatting.GRAY));
 		ModAdvancements.award(parent, "parenthood");
 		return InteractionResult.SUCCESS;
