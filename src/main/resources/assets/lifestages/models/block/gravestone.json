@@ -1,0 +1,77 @@
+{
+  "textures": {
+    "front": "lifestages:block/gravestone_front",
+    "stone": "lifestages:block/gravestone_side",
+    "particle": "lifestages:block/gravestone_side"
+  },
+  "elements": [
+    {
+      "from": [
+        2,
+        0,
+        6
+      ],
+      "to": [
+        14,
+        15,
+        10
+      ],
+      "faces": {
+        "north": {
+          "texture": "#front",
+          "uv": [
+            2,
+            1,
+            14,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#front",
+          "uv": [
+            2,
+            1,
+            14,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#stone",
+          "uv": [
+            6,
+            1,
+            10,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#stone",
+          "uv": [
+            6,
+            1,
+            10,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#stone",
+          "uv": [
+            2,
+            6,
+            14,
+            10
+          ]
+        },
+        "down": {
+          "texture": "#stone",
+          "uv": [
+            2,
+            6,
+            14,
+            10
+          ]
+        }
+      }
+    }
+  ]
+}

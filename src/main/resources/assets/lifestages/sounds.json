@@ -1,0 +1,222 @@
+{
+  "baby.cry": {
+    "subtitle": "subtitles.lifestages.baby.cry",
+    "sounds": [
+      {
+        "name": "mob/fox/screech1",
+        "pitch": 1.35,
+        "volume": 1.0
+      },
+      {
+        "name": "mob/fox/screech2",
+        "pitch": 1.35,
+        "volume": 1.0
+      },
+      {
+        "name": "mob/fox/screech3",
+        "pitch": 1.35,
+        "volume": 1.0
+      },
+      {
+        "name": "mob/fox/screech4",
+        "pitch": 1.35,
+        "volume": 1.0
+      }
+    ]
+  },
+  "baby.fart": {
+    "subtitle": "subtitles.lifestages.baby.fart",
+    "sounds": [
+      {
+        "name": "random/burp",
+        "pitch": 0.5,
+        "volume": 1.0
+      },
+      {
+        "name": "mob/slime/attack1",
+        "pitch": 0.5,
+        "volume": 1.0
+      },
+      {
+        "name": "mob/slime/attack2",
+        "pitch": 0.45,
+        "volume": 1.0
+      }
+    ]
+  },
+  "baby.fart_epic": {
+    "subtitle": "subtitles.lifestages.baby.fart_epic",
+    "sounds": [
+      {
+        "name": "random/burp",
+        "pitch": 0.3,
+        "volume": 1.0
+      }
+    ]
+  },
+  "baby.giggle": {
+    "subtitle": "subtitles.lifestages.baby.giggle",
+    "sounds": [
+      {
+        "name": "mob/allay/item_given1",
+        "pitch": 1.1,
+        "volume": 1.0
+      },
+      {
+        "name": "mob/allay/item_given2",
+        "pitch": 1.1,
+        "volume": 1.0
+      },
+      {
+        "name": "mob/allay/item_given3",
+        "pitch": 1.1,
+        "volume": 1.0
+      },
+      {
+        "name": "mob/allay/item_given4",
+        "pitch": 1.1,
+        "volume": 1.0
+      }
+    ]
+  },
+  "baby.poop": {
+    "subtitle": "subtitles.lifestages.baby.poop",
+    "sounds": [
+      {
+        "name": "mob/slime/big1",
+        "pitch": 0.8,
+        "volume": 1.0
+      },
+      {
+        "name": "mob/slime/big2",
+        "pitch": 0.8,
+        "volume": 1.0
+      },
+      {
+        "name": "mob/slime/big3",
+        "pitch": 0.8,
+        "volume": 1.0
+      },
+      {
+        "name": "mob/slime/big4",
+        "pitch": 0.8,
+        "volume": 1.0
+      },
+      {
+        "name": "block/mud/step1",
+        "pitch": 0.7,
+        "volume": 1.0
+      },
+      {
+        "name": "block/mud/step2",
+        "pitch": 0.7,
+        "volume": 1.0
+      },
+      {
+        "name": "block/mud/step3",
+        "pitch": 0.7,
+        "volume": 1.0
+      },
+      {
+        "name": "block/mud/step4",
+        "pitch": 0.7,
+        "volume": 1.0
+      }
+    ]
+  },
+  "baby.rumble": {
+    "subtitle": "subtitles.lifestages.baby.rumble",
+    "sounds": [
+      {
+        "name": "mob/ravager/idle1",
+        "pitch": 1.7,
+        "volume": 0.6
+      },
+      {
+        "name": "mob/ravager/idle2",
+        "pitch": 1.7,
+        "volume": 0.6
+      },
+      {
+        "name": "mob/ravager/idle3",
+        "pitch": 1.7,
+        "volume": 0.6
+      },
+      {
+        "name": "mob/ravager/idle4",
+        "pitch": 1.7,
+        "volume": 0.6
+      }
+    ]
+  },
+  "baby.diaper_change": {
+    "subtitle": "subtitles.lifestages.baby.diaper_change",
+    "sounds": [
+      {
+        "name": "dig/cloth1",
+        "pitch": 1.2,
+        "volume": 1.0
+      },
+      {
+        "name": "dig/cloth2",
+        "pitch": 1.2,
+        "volume": 1.0
+      },
+      {
+        "name": "dig/cloth3",
+        "pitch": 1.2,
+        "volume": 1.0
+      },
+      {
+        "name": "dig/cloth4",
+        "pitch": 1.2,
+        "volume": 1.0
+      }
+    ]
+  },
+  "mom.hum": {
+    "subtitle": "subtitles.lifestages.mom.hum",
+    "sounds": [
+      {
+        "name": "note/bell",
+        "pitch": 0.8,
+        "volume": 0.5
+      }
+    ]
+  },
+  "item.rattle": {
+    "subtitle": "subtitles.lifestages.item.rattle",
+    "sounds": [
+      {
+        "name": "item/armor/equip_chain1",
+        "pitch": 1.6,
+        "volume": 0.7
+      },
+      {
+        "name": "item/armor/equip_chain2",
+        "pitch": 1.6,
+        "volume": 0.7
+      },
+      {
+        "name": "item/armor/equip_chain3",
+        "pitch": 1.6,
+        "volume": 0.7
+      },
+      {
+        "name": "item/armor/equip_chain4",
+        "pitch": 1.6,
+        "volume": 0.7
+      },
+      {
+        "name": "item/armor/equip_chain5",
+        "pitch": 1.6,
+        "volume": 0.7
+      },
+      {
+        "name": "item/armor/equip_chain6",
+        "pitch": 1.6,
+        "volume": 0.7
+      }
+    ]
+  }
+}

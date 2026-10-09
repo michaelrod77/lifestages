@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "lifestages:block/will_chest_top",
+    "front": "lifestages:block/will_chest_front",
+    "side": "lifestages:block/will_chest_side"
+  }
+}

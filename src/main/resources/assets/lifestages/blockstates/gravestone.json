@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "lifestages:block/gravestone"
+    },
+    "facing=east": {
+      "model": "lifestages:block/gravestone",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "lifestages:block/gravestone",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "lifestages:block/gravestone",
+      "y": 270
+    }
+  }
+}

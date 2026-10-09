@@ -1,0 +1,28 @@
+{
+  "display": {
+    "icon": {
+      "id": "lifestages:dirty_diaper"
+    },
+    "title": {
+      "text": "Nothing but Net"
+    },
+    "description": {
+      "text": "Throw a dirty diaper into a trash can."
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ],
+  "parent": "lifestages:root"
+}

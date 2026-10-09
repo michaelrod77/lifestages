@@ -1,0 +1,28 @@
+{
+  "display": {
+    "icon": {
+      "id": "lifestages:milk_bottle"
+    },
+    "title": {
+      "text": "Life Stages"
+    },
+    "description": {
+      "text": "Begin a life."
+    },
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "hidden": false,
+    "background": "minecraft:gui/advancements/backgrounds/stone"
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

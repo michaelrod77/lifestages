@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:paper",
+    "minecraft:paper",
+    "minecraft:white_wool"
+  ],
+  "result": {
+    "id": "lifestages:clean_diaper",
+    "count": 2
+  }
+}

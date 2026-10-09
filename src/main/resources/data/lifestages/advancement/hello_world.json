@@ -1,0 +1,28 @@
+{
+  "display": {
+    "icon": {
+      "id": "lifestages:milk_bottle"
+    },
+    "title": {
+      "text": "Hello World"
+    },
+    "description": {
+      "text": "Grow from Newborn to Infant."
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ],
+  "parent": "lifestages:root"
+}

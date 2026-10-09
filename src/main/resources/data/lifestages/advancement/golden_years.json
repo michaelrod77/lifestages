@@ -1,0 +1,28 @@
+{
+  "display": {
+    "icon": {
+      "id": "lifestages:walking_cane"
+    },
+    "title": {
+      "text": "Golden Years"
+    },
+    "description": {
+      "text": "Become Elderly."
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ],
+  "parent": "lifestages:senior_discount"
+}

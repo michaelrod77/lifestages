@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "open=false": {
+      "model": "lifestages:block/trash_can"
+    },
+    "open=true": {
+      "model": "lifestages:block/trash_can_open"
+    }
+  }
+}

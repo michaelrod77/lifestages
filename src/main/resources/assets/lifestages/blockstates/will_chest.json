@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "lifestages:block/will_chest"
+    },
+    "facing=east": {
+      "model": "lifestages:block/will_chest",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "lifestages:block/will_chest",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "lifestages:block/will_chest",
+      "y": 270
+    }
+  }
+}

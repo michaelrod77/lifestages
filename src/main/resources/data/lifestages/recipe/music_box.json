@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " G ",
+    "PNP"
+  ],
+  "key": {
+    "G": "minecraft:gold_nugget",
+    "P": "#minecraft:planks",
+    "N": "minecraft:note_block"
+  },
+  "result": {
+    "id": "lifestages:music_box"
+  }
+}

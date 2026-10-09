@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:cauldron",
+    "minecraft:iron_trapdoor",
+    "minecraft:lime_dye"
+  ],
+  "result": {
+    "id": "lifestages:trash_can"
+  }
+}

@@ -1,0 +1,11 @@
+{
+	"schemaVersion": 1,
+	"id": "lifestages-test",
+	"version": "1.0.0",
+	"name": "Life Stages tests",
+	"environment": "*",
+	"entrypoints": {
+		"fabric-client-gametest": ["dev.lifestages.test.LifeStagesClientTest", "dev.lifestages.test.LifeStagesMultiplayerTest"]
+	},
+	"depends": { "lifestages": "*" }
+}

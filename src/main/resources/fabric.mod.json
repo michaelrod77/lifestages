@@ -1,0 +1,26 @@
+{
+	"schemaVersion": 1,
+	"id": "lifestages",
+	"version": "${version}",
+	"name": "Life Stages",
+	"description": "Live a whole life in multiplayer: start as a baby or an adult, grow up through 11 stages, raise children, grow old, and choose how to come back.",
+	"authors": ["Michael Rod"],
+	"contact": {},
+	"license": "All-Rights-Reserved",
+	"icon": "assets/lifestages/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": ["dev.lifestages.LifeStages"],
+		"client": ["dev.lifestages.client.LifeStagesClient"]
+	},
+	"mixins": [
+		"lifestages.mixins.json",
+		{ "config": "lifestages.client.mixins.json", "environment": "client" }
+	],
+	"depends": {
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~26.3",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}

@@ -1,0 +1,28 @@
+{
+  "textures": {
+    "mess": "lifestages:block/mess",
+    "particle": "lifestages:block/mess"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        0.5,
+        16
+      ],
+      "faces": {
+        "up": {
+          "texture": "#mess"
+        },
+        "down": {
+          "texture": "#mess"
+        }
+      }
+    }
+  ]
+}

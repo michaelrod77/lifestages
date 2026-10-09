@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:milk_bucket",
+    "minecraft:glass_bottle"
+  ],
+  "result": {
+    "id": "lifestages:milk_bottle",
+    "count": 1
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "lifestages:block/teddy_bear"
+    },
+    "facing=east": {
+      "model": "lifestages:block/teddy_bear",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "lifestages:block/teddy_bear",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "lifestages:block/teddy_bear",
+      "y": 270
+    }
+  }
+}

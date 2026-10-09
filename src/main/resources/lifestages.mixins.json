@@ -1,0 +1,15 @@
+{
+	"required": true,
+	"package": "dev.lifestages.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"EntityMixin",
+		"FoodPropertiesMixin",
+		"MobAccessor",
+		"PlayerAdvancementsMixin",
+		"PlayerMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

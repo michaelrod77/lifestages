@@ -1,0 +1,11 @@
+{
+	"required": true,
+	"package": "dev.lifestages.mixin.client",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"PlayerModelMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

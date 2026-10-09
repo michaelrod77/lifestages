@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "WWW",
+    "PCP",
+    "PPP"
+  ],
+  "key": {
+    "W": "minecraft:white_wool",
+    "P": "#minecraft:planks",
+    "C": "minecraft:chest"
+  },
+  "result": {
+    "id": "lifestages:changing_table"
+  }
+}
