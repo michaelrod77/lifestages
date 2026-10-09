@@ -1,7 +1,11 @@
 # gradle
 
 .gradle/
-build/
+build/*
+!build/libs/
+build/libs/*
+!build/libs/lifestages-*.jar
+build/libs/*-sources.jar
 out/
 classes/
 
