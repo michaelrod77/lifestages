@@ -127,7 +127,13 @@ cp build/libs/lifestages-0.1.0.jar "$USERPROFILE/curseforge/minecraft/Instances/
   - Renderers: Mom, NPC baby, player overlay (including the carrier).
   - `PlayerModelMixin`: baby proportions.
 
-## State of the last round (round 13)
+## State of the last round (round 14)
+
+| Change | Status |
+|---|---|
+| Growth bar shows 1, 2, or 3 arrows while goals are speeding the stage up, and none at the normal pace | Done, tested |
+
+## State of the previous round (round 13)
 
 | Change | Status |
 |---|---|

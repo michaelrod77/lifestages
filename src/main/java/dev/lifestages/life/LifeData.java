@@ -98,6 +98,25 @@ public final class LifeData {
 		return n == 0 ? 0 : sum / n;
 	}
 
+	/**
+	 * How many fast-forward arrows to draw on the growth bar. Goals (milk, food, naps, nights) shorten the stage,
+	 * so progress runs faster than the default. None at the normal pace; one, two or three as it speeds up.
+	 * A new stage clears the goals, and the arrows with them.
+	 */
+	public int speedArrows() {
+		double rate = 1.0 / (1.0 - 0.5 * goalProgress());
+		if (rate < 1.02) {
+			return 0;
+		}
+		if (rate < 1.25) {
+			return 1;
+		}
+		if (rate < 1.6) {
+			return 2;
+		}
+		return 3;
+	}
+
 	/** Ticks this stage lasts: the full default length, cut by up to half as goals are completed. */
 	public int requiredTicks(double lengthMultiplier) {
 		double base = stage().minMinutes * 60 * 20 * lengthMultiplier;

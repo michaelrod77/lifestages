@@ -497,6 +497,45 @@ public class LifeStagesClientTest implements FabricClientGameTest {
 			ctx.waitTicks(220);
 			ctx.takeScreenshot("05b_growth_bar");
 
+			// 5c. Goals speed the stage up: no arrows at the normal pace, then one and three as it accelerates.
+			check(server.computeOnServer(s -> {
+				var d = Life.of(s.getPlayerList().getPlayers().get(0));
+				int milk = d.milk, food = d.food, naps = d.naps, nights = d.nights;
+				d.milk = d.food = d.naps = d.nights = 0;
+				boolean none = d.speedArrows() == 0;
+				d.milk = 1;
+				boolean one = d.speedArrows() == 1;
+				d.milk = d.stage().milk;
+				d.food = d.stage().food;
+				d.naps = d.stage().naps;
+				d.nights = d.stage().nights;
+				boolean three = d.speedArrows() == 3;
+				d.milk = milk;
+				d.food = food;
+				d.naps = naps;
+				d.nights = nights;
+				return none && one && three;
+			}), "the growth bar arrows did not follow how fast the stage is speeding up");
+			server.runOnServer(s -> {
+				var p = s.getPlayerList().getPlayers().get(0);
+				var d = Life.of(p);
+				d.milk = d.stage().milk;
+				d.food = d.stage().food;
+				d.naps = d.stage().naps;
+				d.nights = d.stage().nights;
+				d.stageTicks = d.requiredTicks(dev.lifestages.LifeConfig.get().lifeLengthMultiplier) / 2;
+				Life.save(p, d);
+			});
+			ctx.waitTicks(10);
+			ctx.takeScreenshot("05c_speed_arrows");
+			server.runOnServer(s -> {
+				var p = s.getPlayerList().getPlayers().get(0);
+				var d = Life.of(p);
+				d.milk = d.food = d.naps = d.nights = 0;
+				d.stageTicks = d.requiredTicks(dev.lifestages.LifeConfig.get().lifeLengthMultiplier) / 2;
+				Life.save(p, d);
+			});
+
 			// 6. Sugar rush.
 			server.runCommand("give @p minecraft:cookie 4");
 			server.runCommand("effect give @p minecraft:hunger 3 255 true");

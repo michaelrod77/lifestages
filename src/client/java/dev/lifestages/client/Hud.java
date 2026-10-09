@@ -126,15 +126,47 @@ public final class Hud {
 		float done = Mth.clamp(d.stageTicks / (float) required, 0f, 1f);
 		int left = Math.max(0, required - d.stageTicks);
 		String next = d.stage().next().label + " in " + (left >= 1200 ? (left + 1199) / 1200 + " min" : (left + 19) / 20 + " s");
-		int w = 81, x0 = cx - w / 2 - mc.font.width(next) / 2 - 3;
-		g.fill(x0 - 1, y - 1, x0 + w + 1, y + 4, 0xA0000000);
-		g.fill(x0, y, x0 + w, y + 3, 0xFF3A4A44);
+		int w = 81, barH = 5, x0 = cx - w / 2 - mc.font.width(next) / 2 - 3;
+		g.fill(x0 - 1, y - 1, x0 + w + 1, y + barH + 1, 0xA0000000);
+		g.fill(x0, y, x0 + w, y + barH, 0xFF3A4A44);
 		int filled = Math.round(w * done);
 		if (filled > 0) {
-			g.fill(x0, y, x0 + filled, y + 3, 0xFF9ED9C0);
+			g.fill(x0, y, x0 + filled, y + barH, 0xFF9ED9C0);
 			g.fill(x0, y, x0 + filled, y + 1, 0xFFCFF2E2); // highlight
 		}
-		g.text(mc.font, next, x0 + w + 5, y - 3, 0xFFCFE8DC);
+		drawSpeedArrows(g, x0, y, w, filled, d.speedArrows());
+		g.text(mc.font, next, x0 + w + 5, y - 2, 0xFFCFE8DC);
+	}
+
+	/** White fast-forward marks on the empty part of the bar, at the leading edge of the fill. */
+	private static void drawSpeedArrows(GuiGraphicsExtractor g, int x0, int y, int w, int filled, int count) {
+		if (count <= 0) {
+			return;
+		}
+		int step = 5;
+		int span = 4 + (count - 1) * step;
+		int ax = x0 + filled;
+		if (ax + span > x0 + w) {
+			ax = x0 + w - span;
+		}
+		if (ax < x0) {
+			ax = x0;
+		}
+		for (int i = 0; i < count; i++) {
+			drawChevron(g, ax + i * step, y);
+		}
+	}
+
+	/** One right-pointing triangle, with a gap before the next so they stay countable. */
+	private static void drawChevron(GuiGraphicsExtractor g, int x, int y) {
+		int color = 0xFFFFFFFF;
+		g.fill(x + 3, y - 1, x + 4, y, color);
+		g.fill(x + 2, y, x + 4, y + 1, color);
+		g.fill(x + 1, y + 1, x + 4, y + 2, color);
+		g.fill(x, y + 2, x + 4, y + 3, color);
+		g.fill(x + 1, y + 3, x + 4, y + 4, color);
+		g.fill(x + 2, y + 4, x + 4, y + 5, color);
+		g.fill(x + 3, y + 5, x + 4, y + 6, color);
 	}
 
 	/**

@@ -1,6 +1,6 @@
 # Life Stages
 
-A Fabric mod for Minecraft Java 26.3. Every player lives a whole life: start as a baby or an adult, grow through 11 stages by eating, drinking milk and sleeping, raise children, grow old, and choose how to come back.
+A Fabric mod for Minecraft Java 26.3. Every player lives a whole life: start as a baby or an adult, grow through 11 stages by eating, drinking milk and sleeping, raise children, grow old, and choose how to come back. The bar under your stage shows how far along you are. While those activities are speeding the stage up, one, two, or three arrows sit on the bar. They leave when the boost does.
 
 ## Requirements
 
