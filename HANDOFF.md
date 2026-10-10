@@ -6,7 +6,7 @@ A Fabric mod for Minecraft Java **26.3**. Players live a whole life (Newborn to 
 - **Design doc (Claude Docs):** https://claude.ai/code/artifact/ef358590-8e4f-4490-b749-e35651303602. The table under "Changes from playtesting" gets one row per change, every round.
 - **Texture gallery (artifact):** https://claude.ai/artifact/CxEPJzCLLQZLT6ks4VNtLJ (built by `tools/textures/build_gallery.py`, republished to the same URL).
 - **Memory note:** `C:\Users\micha\.claude\projects\C--dev-wptournaments\memory\life-stages-mod.md` (decisions per round).
-- **Git:** `master`, pushed to https://github.com/michaelrod77/lifestages. **After every update: commit, rebuild the jar, and push.** The built jar `build/libs/lifestages-0.1.0.jar` is tracked on purpose so the other test machines can `git pull` and copy it into their mods folder.
+- **Git:** branch `main`, pushed to https://github.com/michaelrod77/lifestages. This shell has no git identity set; commit with `git -c user.name="Michael Rodriguez" -c user.email="3519552+michaelrod77@users.noreply.github.com" commit ...`. **After every update: commit, rebuild the jar, and push.** The built jar `build/libs/lifestages-0.1.0.jar` is tracked on purpose so the other test machines can `git pull` and copy it into their mods folder.
 
 ## Working with the user
 
