@@ -39,6 +39,32 @@ public final class Payloads {
 	}
 
 	/** S2C: a child of yours is crying; point at them. */
+	/** S2C: a baby just hatched from your egg; open the screen to name them and choose their look. */
+	public record OpenBabyDesigner(int entityId, String name, int look) implements CustomPacketPayload {
+		public static final Type<OpenBabyDesigner> TYPE = typeOf("open_baby_designer");
+		public static final StreamCodec<RegistryFriendlyByteBuf, OpenBabyDesigner> CODEC = StreamCodec.composite(
+				ByteBufCodecs.VAR_INT, OpenBabyDesigner::entityId, ByteBufCodecs.STRING_UTF8, OpenBabyDesigner::name,
+				ByteBufCodecs.VAR_INT, OpenBabyDesigner::look, OpenBabyDesigner::new);
+
+		@Override
+		public Type<OpenBabyDesigner> type() {
+			return TYPE;
+		}
+	}
+
+	/** C2S: the name and look chosen for a new baby. */
+	public record NameBaby(int entityId, String name, int look) implements CustomPacketPayload {
+		public static final Type<NameBaby> TYPE = typeOf("name_baby");
+		public static final StreamCodec<RegistryFriendlyByteBuf, NameBaby> CODEC = StreamCodec.composite(
+				ByteBufCodecs.VAR_INT, NameBaby::entityId, ByteBufCodecs.STRING_UTF8, NameBaby::name,
+				ByteBufCodecs.VAR_INT, NameBaby::look, NameBaby::new);
+
+		@Override
+		public Type<NameBaby> type() {
+			return TYPE;
+		}
+	}
+
 	public record CryArrow(int entityId) implements CustomPacketPayload {
 		public static final Type<CryArrow> TYPE = typeOf("cry_arrow");
 		public static final StreamCodec<RegistryFriendlyByteBuf, CryArrow> CODEC = StreamCodec.composite(

@@ -44,7 +44,7 @@ On first join you choose Adult (you start as a Young Adult, age 18, listed as lo
 
 ## Raising an NPC baby
 
-When you reach Adult, your birthday present holds four Baby Spawn Eggs. Use one on the ground to have a baby (use as many as you like). Your baby is curious: it crawls (later toddles) around its home, off to animals, flowers and anything you drop. The top-left of your screen shows each nearby baby's food, rest and diaper.
+When you reach Adult, your birthday present holds two Baby Spawn Eggs. Use one on the ground to have a baby; a "Meet your baby" screen lets you change their suggested name (or roll a new one) and choose one of four looks. Your baby is curious: it crawls (later toddles) around its home, off to animals, flowers and anything you drop. The top-left of your screen shows each nearby baby's food, rest and diaper.
 
 - Feed it: a newborn only drinks milk; after that it eats just about anything. Anything sugary gives a sugar rush, and it runs off, sometimes toward water, drops or monsters. When the rush wears off it crashes: very tired, very slow and cranky until it naps (carry it or lay it in a crib), two minutes at most. Player children crash too: slow and dizzy until they sleep.
 - Change it with a clean diaper when it's dirty. Changed on a changing table, the diaper stays clean twice as long.

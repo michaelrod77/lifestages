@@ -110,7 +110,7 @@ cp build/libs/lifestages-0.1.0.jar "$USERPROFILE/curseforge/minecraft/Instances/
   - `Choices` (Adult/Baby/Elderly/Ghost, Mom pick, `lookingForBaby` defaults to on). A baby connection places a `StarterChest` (up to 4).
   - `Feeding` (only newborns are milk-only).
   - `Carrying` (the baby carrier; two newborns or infants at once).
-  - `Family`, `Emotes`, `Bodily`, `Diapers`, `Cribs`, `Birthdays` (presents; Adult gets 4 Baby Spawn Eggs), `Growth`, `Ghosts`, `WillChest`.
+  - `Family`, `Emotes`, `Bodily`, `Diapers`, `Cribs`, `Birthdays` (presents; Adult gets 2 Baby Spawn Eggs), `Growth`, `Ghosts`, `WillChest`.
   - `Moms` (assign, spawn, house planning that avoids other players' houses).
   - `HouseBuilder` (the 13x7 cottage blueprint with a nursery; site choice keeps 4+ blocks from other houses).
   - `DropFixer` (fills or fences drops near the house).
@@ -128,7 +128,14 @@ cp build/libs/lifestages-0.1.0.jar "$USERPROFILE/curseforge/minecraft/Instances/
   - Renderers: Mom, NPC baby, player overlay (including the carrier).
   - `PlayerModelMixin`: baby proportions.
 
-## State of the last round (round 16)
+## State of the last round (round 17)
+
+| Change | Status |
+|---|---|
+| The Adult birthday present holds two Baby Spawn Eggs (slots 1-2), the other two slots empty | Done, tested |
+| Hatching an egg opens "Meet your baby" (`BabyDesignScreen`): edit the suggested name (max 24 characters, Random button) and pick one of four looks; Done or closing the screen applies it (`NameBaby` payload, parent only) | Done, tested (screenshot `08d0_meet_your_baby`) |
+
+## State of the previous round (round 16)
 
 | Change | Status |
 |---|---|

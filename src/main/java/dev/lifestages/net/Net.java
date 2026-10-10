@@ -25,6 +25,8 @@ public final class Net {
 	public static void init() {
 		PayloadTypeRegistry.clientboundPlay().register(Payloads.OpenChoice.TYPE, Payloads.OpenChoice.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Payloads.CryArrow.TYPE, Payloads.CryArrow.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(Payloads.OpenBabyDesigner.TYPE, Payloads.OpenBabyDesigner.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(Payloads.NameBaby.TYPE, Payloads.NameBaby.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Payloads.PairPrompt.TYPE, Payloads.PairPrompt.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(Payloads.ConfigSync.TYPE, Payloads.ConfigSync.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Payloads.Choose.TYPE, Payloads.Choose.CODEC);
@@ -40,6 +42,11 @@ public final class Net {
 			}
 		});
 		ServerPlayNetworking.registerGlobalReceiver(Act.TYPE, (p, ctx) -> act(ctx.player(), p.action(), p.target()));
+		ServerPlayNetworking.registerGlobalReceiver(Payloads.NameBaby.TYPE, (p, ctx) -> {
+			if (ctx.player().level().getEntity(p.entityId()) instanceof dev.lifestages.entity.BabyEntity baby) {
+				baby.nameAndLook(ctx.player(), p.name(), p.look());
+			}
+		});
 	}
 
 	private static void act(ServerPlayer player, int action, int target) {
@@ -97,6 +104,10 @@ public final class Net {
 			parents.add(new Payloads.ParentOption(p.getUUID(), p.getName().getString()));
 		}
 		ServerPlayNetworking.send(player, new Payloads.OpenChoice(mode, ghostLocked, parents));
+	}
+
+	public static void openBabyDesigner(ServerPlayer parent, dev.lifestages.entity.BabyEntity baby) {
+		ServerPlayNetworking.send(parent, new Payloads.OpenBabyDesigner(baby.getId(), baby.getName().getString(), baby.look()));
 	}
 
 	public static void cryArrow(ServerPlayer parent, net.minecraft.world.entity.Entity baby) {

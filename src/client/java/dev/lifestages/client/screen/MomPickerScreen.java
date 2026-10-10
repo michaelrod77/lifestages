@@ -88,35 +88,8 @@ public class MomPickerScreen extends Screen {
 			int x = left() + i * (CARD_W + 6);
 			g.fill(x, y, x + CARD_W, y + CARD_H, i == hovered ? 0xC0F2A2BE : 0x90000000);
 			g.fill(x + 1, y + 1, x + CARD_W - 1, y + CARD_H - 1, i == hovered ? 0xE0302838 : 0xC0181820);
-			doll(g, LifeStages.id("textures/entity/mom/mom_" + (i + 1) + ".png"), x + CARD_W / 2, y + 8);
+			SkinDoll.draw(g, LifeStages.id("textures/entity/mom/mom_" + (i + 1) + ".png"), x + CARD_W / 2, y + 8, SCALE);
 			g.centeredText(font, "Mom " + (i + 1), x + CARD_W / 2, y + CARD_H - 12, i == hovered ? 0xFFFFE0EC : 0xFFE0E0E0);
 		}
-	}
-
-	/**
-	 * A flat front view of a 128 x 128 (HD) slim player skin: head, body, arms and legs with their outer layers,
-	 * each part drawn SCALE screen pixels per skin pixel (1 skin pixel = 2 texture pixels).
-	 */
-	private static void doll(GuiGraphicsExtractor g, Identifier tex, int cx, int y) {
-		int s = SCALE;
-		int bodyX = cx - 4 * s, headY = y, bodyY = y + 8 * s, legY = bodyY + 12 * s;
-		// base layer, then the outer layer on top
-		part(g, tex, bodyX, headY, 8, 8, 8, 8);           // head front
-		part(g, tex, bodyX, headY, 40, 8, 8, 8);          // hat
-		part(g, tex, bodyX, bodyY, 20, 20, 8, 12);        // body
-		part(g, tex, bodyX, bodyY, 20, 36, 8, 12);        // jacket
-		part(g, tex, bodyX - 3 * s, bodyY, 44, 20, 3, 12); // right arm (viewer's left)
-		part(g, tex, bodyX - 3 * s, bodyY, 44, 36, 3, 12);
-		part(g, tex, bodyX + 8 * s, bodyY, 36, 52, 3, 12); // left arm
-		part(g, tex, bodyX + 8 * s, bodyY, 52, 52, 3, 12);
-		part(g, tex, bodyX, legY, 4, 20, 4, 12);           // right leg
-		part(g, tex, bodyX, legY, 4, 36, 4, 12);
-		part(g, tex, bodyX + 4 * s, legY, 20, 52, 4, 12);  // left leg
-		part(g, tex, bodyX + 4 * s, legY, 4, 52, 4, 12);
-	}
-
-	/** One rectangle of the skin, given in 64 x 64 skin pixels. */
-	private static void part(GuiGraphicsExtractor g, Identifier tex, int x, int y, int u, int v, int w, int h) {
-		g.blit(RenderPipelines.GUI_TEXTURED, tex, x, y, u * 2, v * 2, w * SCALE, h * SCALE, w * 2, h * 2, 128, 128);
 	}
 }

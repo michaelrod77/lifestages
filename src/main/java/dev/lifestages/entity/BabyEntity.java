@@ -79,7 +79,7 @@ public class BabyEntity extends PathfinderMob {
 	public static final int MAX_HUNGER = 20, MAX_ENERGY = 100;
 	/** Grown up: the last stage an NPC child reaches. */
 	public static final Stage GROWN = Stage.YOUNG_ADULT;
-	private static final String[] NAMES = {"Lily", "Max", "Ava", "Leo", "Mia", "Theo", "Ruby", "Finn", "Ivy", "Milo", "Rosie", "Sam",
+	public static final String[] NAMES = {"Lily", "Max", "Ava", "Leo", "Mia", "Theo", "Ruby", "Finn", "Ivy", "Milo", "Rosie", "Sam",
 			"Nora", "Ollie", "Zoe", "Jack", "Ellie", "Noah", "Poppy", "Eli", "Luna", "Ben", "Daisy", "Kai", "Willow", "Toby", "Hazel", "Arlo"};
 
 	private BlockPos home;
@@ -153,6 +153,30 @@ public class BabyEntity extends PathfinderMob {
 		setCustomNameVisible(true);
 		applyStage();
 		dev.lifestages.life.StarterChest.give(parent, getName().getString());
+	}
+
+	/**
+	 * The parent's choice on the "Meet your baby" screen: a name (up to 24 characters; blank keeps the current one)
+	 * and one of the four looks. Only the baby's own parent, close by, can set it.
+	 */
+	public void nameAndLook(ServerPlayer by, String name, int look) {
+		if (!by.getUUID().equals(ownerId()) || by.distanceToSqr(this) > 32 * 32) {
+			return;
+		}
+		String clean = net.minecraft.util.StringUtil.filterText(name == null ? "" : name).trim();
+		if (clean.length() > 24) {
+			clean = clean.substring(0, 24).trim();
+		}
+		if (!clean.isEmpty()) {
+			setCustomName(Component.literal(clean));
+		}
+		if (look >= 1 && look <= 4) {
+			entityData.set(LOOK, look);
+		}
+		by.sendSystemMessage(Component.literal("Congratulations! Meet your baby, " + getName().getString() + "!").withStyle(ChatFormatting.LIGHT_PURPLE));
+		by.sendSystemMessage(Component.literal("Keep them fed (milk bottles), clean (clean diapers) and rested (a crib), and keep them safe. "
+				+ "Right-click with an empty hand to pick them up; right-click a crib to lay them down, or a changing table to put them on it.")
+				.withStyle(ChatFormatting.GRAY));
 	}
 
 	public Stage stage() {

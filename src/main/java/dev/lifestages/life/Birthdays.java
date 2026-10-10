@@ -24,15 +24,15 @@ public final class Birthdays {
 		String table = d.presents == 0 ? "teddy" : ((PresentBlock) block).tier();
 		ItemStack present = new ItemStack(block);
 		if (reached == Stage.ADULT) {
-			// Time to start a family: four Baby Spawn Eggs, one per slot. Use as many as you like.
+			// Time to start a family: two Baby Spawn Eggs in the first two slots; the other two stay empty.
 			java.util.List<ItemStack> eggs = new java.util.ArrayList<>();
-			for (int i = 0; i < 4; i++) {
+			for (int i = 0; i < 2; i++) {
 				eggs.add(new ItemStack(dev.lifestages.registry.ModItems.BABY_SPAWN_EGG));
 			}
 			present.set(DataComponents.CONTAINER, net.minecraft.world.item.component.ItemContainerContents.fromItems(eggs));
 			d.presents++;
 			Give.item(player, present);
-			player.sendSystemMessage(Component.literal("Happy birthday! This present is special: inside are four Baby Spawn Eggs. Have as many babies as you like!")
+			player.sendSystemMessage(Component.literal("Happy birthday! This present is special: inside are two Baby Spawn Eggs. Have one baby, or two!")
 					.withStyle(ChatFormatting.LIGHT_PURPLE));
 			return;
 		}

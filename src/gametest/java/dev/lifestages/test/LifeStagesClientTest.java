@@ -636,7 +636,7 @@ public class LifeStagesClientTest implements FabricClientGameTest {
 			ctx.waitTicks(5);
 			ctx.takeScreenshot("08b_trash_can_open");
 
-			// 8c. Reaching Adult: the birthday present holds four Baby Spawn Eggs.
+			// 8c. Reaching Adult: the birthday present holds two Baby Spawn Eggs (the other two slots stay empty).
 			check(server.computeOnServer(s -> {
 				var p = s.getPlayerList().getPlayers().get(0);
 				var d = Life.of(p);
@@ -646,12 +646,12 @@ public class LifeStagesClientTest implements FabricClientGameTest {
 				for (int i = 0; i < inv.getContainerSize(); i++) {
 					var c = inv.getItem(i).get(net.minecraft.core.component.DataComponents.CONTAINER);
 					if (inv.getItem(i).is(ModBlocks.PRESENT_EPIC.asItem()) && c != null
-							&& c.nonEmptyItemCopyStream().filter(e -> e.is(dev.lifestages.registry.ModItems.BABY_SPAWN_EGG)).count() == 4) {
+							&& c.nonEmptyItemCopyStream().filter(e -> e.is(dev.lifestages.registry.ModItems.BABY_SPAWN_EGG)).count() == 2) {
 						return true;
 					}
 				}
 				return false;
-			}), "the Adult birthday present did not hold four Baby Spawn Eggs");
+			}), "the Adult birthday present did not hold two Baby Spawn Eggs");
 
 			// 8d. Hatch an NPC baby and look after it: feed, change, carry to a crib, sugar rush, rescue, monsters.
 			server.runOnServer(s -> {
@@ -664,6 +664,22 @@ public class LifeStagesClientTest implements FabricClientGameTest {
 				level.setBlockAndUpdate(ground.above(), net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
 				p.gameMode.useItemOn(p, level, p.getMainHandItem(), net.minecraft.world.InteractionHand.MAIN_HAND, hit);
 			});
+			// "Meet your baby": rename them and choose look 3.
+			ctx.waitForScreen(dev.lifestages.client.screen.BabyDesignScreen.class);
+			ctx.waitTicks(5);
+			ctx.takeScreenshot("08d0_meet_your_baby");
+			ctx.runOnClient(mc -> {
+				var screen = (dev.lifestages.client.screen.BabyDesignScreen) mc.gui.screen();
+				screen.setName("Pip");
+				screen.pickLook(3);
+				screen.onClose();
+			});
+			ctx.waitTicks(5);
+			check(server.computeOnServer(s -> {
+				var p = s.getPlayerList().getPlayers().get(0);
+				var b = p.level().getEntitiesOfClass(dev.lifestages.entity.BabyEntity.class, p.getBoundingBox().inflate(8)).get(0);
+				return "Pip".equals(b.getName().getString()) && b.look() == 3;
+			}), "the new baby did not get the chosen name and look");
 			check(server.computeOnServer(s -> {
 				var p = s.getPlayerList().getPlayers().get(0);
 				var babies = p.level().getEntitiesOfClass(dev.lifestages.entity.BabyEntity.class, p.getBoundingBox().inflate(8));

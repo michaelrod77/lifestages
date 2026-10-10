@@ -60,6 +60,8 @@ public class LifeStagesClient implements ClientModInitializer {
 				mc.setScreenAndShow(new ChoiceScreen(p.mode(), p.ghostLocked(), p.parents()));
 			}
 		});
+		ClientPlayNetworking.registerGlobalReceiver(Payloads.OpenBabyDesigner.TYPE, (p, ctx) -> Minecraft.getInstance().setScreenAndShow(
+				new dev.lifestages.client.screen.BabyDesignScreen(p.entityId(), p.name(), p.look())));
 		ClientPlayNetworking.registerGlobalReceiver(Payloads.CryArrow.TYPE, (p, ctx) -> {
 			ClientLife.cryingEntityId = p.entityId();
 			ClientLife.cryingUntil = ctx.client().level == null ? 0 : ctx.client().level.getGameTime() + 100;
