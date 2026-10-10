@@ -147,6 +147,19 @@ public class LifeStages implements ModInitializer {
 				}
 				return InteractionResult.SUCCESS;
 			}
+			// A baby in a crib sits inside the crib's rails, so a click lands on the crib: treat it as a click on the baby.
+			if (level.getBlockState(hit.getBlockPos()).is(dev.lifestages.registry.ModBlocks.CRIB) && hand == net.minecraft.world.InteractionHand.MAIN_HAND
+					&& player.getMainHandItem().isEmpty()) {
+				var cribBox = new net.minecraft.world.phys.AABB(hit.getBlockPos()).inflate(0.1);
+				var npc = level.getEntitiesOfClass(dev.lifestages.entity.BabyEntity.class, cribBox, b -> b.getVehicle() == null);
+				if (!npc.isEmpty()) {
+					return level.isClientSide() ? InteractionResult.SUCCESS : npc.get(0).interact(player, hand, npc.get(0).position());
+				}
+				var kids = level.getEntitiesOfClass(Player.class, cribBox, k -> k != player && k.getVehicle() == null);
+				if (!kids.isEmpty()) {
+					return Carrying.onUseEntity(player, level, hand, kids.get(0));
+				}
+			}
 			if (player.isCreative() || player.isSpectator()) {
 				return InteractionResult.PASS;
 			}

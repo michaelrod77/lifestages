@@ -550,6 +550,24 @@ public class LifeStagesClientTest implements FabricClientGameTest {
 			check(server.computeOnServer(s -> Life.of(s.getPlayerList().getPlayers().get(0)).sugarTicks > 0), "sugar rush did not start");
 			ctx.takeScreenshot("06_sugar_rush");
 
+			// 6b. The sugar crash: when the rush wears off, a child is slow and dizzy until they sleep.
+			server.runOnServer(s -> {
+				var p = s.getPlayerList().getPlayers().get(0);
+				var d = Life.of(p);
+				d.sugarTicks = 2;
+				Life.save(p, d);
+			});
+			ctx.waitTicks(5);
+			check(server.computeOnServer(s -> {
+				var p = s.getPlayerList().getPlayers().get(0);
+				var d = Life.of(p);
+				boolean crashed = d.crashTicks > 0 && p.hasEffect(net.minecraft.world.effect.MobEffects.NAUSEA)
+						&& p.hasEffect(net.minecraft.world.effect.MobEffects.SLOWNESS);
+				dev.lifestages.life.LifeManager.endSugarCrash(p, d); // keep later screenshots steady
+				Life.save(p, d);
+				return crashed && !p.hasEffect(net.minecraft.world.effect.MobEffects.NAUSEA);
+			}), "a player's sugar rush did not end in a sugar crash (slow and dizzy)");
+
 			// 7. Growth Journal.
 			ctx.runOnClient(mc -> mc.setScreenAndShow(new JournalScreen()));
 			ctx.waitTicks(5);
@@ -718,6 +736,61 @@ public class LifeStagesClientTest implements FabricClientGameTest {
 			ctx.runOnClient(mc -> mc.options.setCameraType(CameraType.THIRD_PERSON_BACK));
 			ctx.waitTicks(10);
 			ctx.takeScreenshot("08c_npc_baby_in_crib");
+
+			// 8c2. A baby asleep in a crib can be picked up by right-clicking the crib; babies can't hop out of cribs;
+			// a diaper changed on the changing table stays clean longer; a sugar rush ends in a crash.
+			check(server.computeOnServer(s -> {
+				var p = s.getPlayerList().getPlayers().get(0);
+				var level = (ServerLevel) p.level();
+				var baby = level.getEntitiesOfClass(dev.lifestages.entity.BabyEntity.class, p.getBoundingBox().inflate(8)).get(0);
+				var main = net.minecraft.world.InteractionHand.MAIN_HAND;
+				var life = Life.of(p);
+				int previousStage = life.stage;
+				life.stage = Stage.YOUNG_ADULT.ordinal();
+				Life.save(p, life);
+				p.setItemInHand(main, net.minecraft.world.item.ItemStack.EMPTY);
+				var crib = baby.blockPosition();
+				p.gameMode.useItemOn(p, level, p.getMainHandItem(), main,
+						new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(crib), net.minecraft.core.Direction.UP, crib, false));
+				boolean fromCrib = baby.getVehicle() == p;
+				// jumping: newborns and infants can't; toddlers clear well under the crib rail (3/4 block)
+				baby.setStage(Stage.NEWBORN);
+				double newbornJump = baby.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.JUMP_STRENGTH);
+				baby.setStage(Stage.TODDLER);
+				double toddlerJump = baby.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.JUMP_STRENGTH);
+				baby.setStage(Stage.NEWBORN);
+				// onto the changing table, changed there, then three bottles
+				var table = p.blockPosition().west(3);
+				level.setBlockAndUpdate(table, ModBlocks.CHANGING_TABLE.defaultBlockState());
+				p.gameMode.useItemOn(p, level, p.getMainHandItem(), main,
+						new net.minecraft.world.phys.BlockHitResult(net.minecraft.world.phys.Vec3.atCenterOf(table), net.minecraft.core.Direction.UP, table, false));
+				baby.setDirty(true);
+				p.setItemInHand(main, new net.minecraft.world.item.ItemStack(dev.lifestages.registry.ModItems.CLEAN_DIAPER));
+				baby.interact(p, main, baby.position());
+				boolean fresh = baby.freshFromTable() && !baby.dirty();
+				for (int i = 0; i < 3; i++) {
+					baby.setHunger(2);
+					p.setItemInHand(main, new net.minecraft.world.item.ItemStack(dev.lifestages.registry.ModItems.MILK_BOTTLE));
+					baby.interact(p, main, baby.position());
+				}
+				p.setItemInHand(main, net.minecraft.world.item.ItemStack.EMPTY);
+				// a sugar rush about to wear off
+				baby.setStage(Stage.TODDLER);
+				baby.startSugarRush(2);
+				life = Life.of(p);
+				life.stage = previousStage;
+				Life.save(p, life);
+				return fromCrib && newbornJump == 0.0 && toddlerJump < 0.3 && fresh;
+			}), "crib pickup, crib jumping limits or the changing-table diaper did not work");
+			ctx.waitTicks(5);
+			check(server.computeOnServer(s -> {
+				var p = s.getPlayerList().getPlayers().get(0);
+				var baby = p.level().getEntitiesOfClass(dev.lifestages.entity.BabyEntity.class, p.getBoundingBox().inflate(8)).get(0);
+				boolean stillClean = !baby.dirty() && baby.feedsSincePoop() >= 3; // three feeds would normally dirty it
+				boolean crash = baby.sugarCrash() && baby.energy() <= 14
+						&& baby.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED) < 0.1;
+				return stillClean && crash;
+			}), "the changing-table diaper did not stay clean, or the sugar rush did not end in a crash");
 			check(server.computeOnServer(s -> {
 				var p = s.getPlayerList().getPlayers().get(0);
 				var level = (ServerLevel) p.level();

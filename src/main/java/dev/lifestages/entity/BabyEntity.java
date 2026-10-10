@@ -66,6 +66,11 @@ public class BabyEntity extends PathfinderMob {
 	private static final EntityDataAccessor<Integer> SUGAR = SynchedEntityData.defineId(BabyEntity.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Boolean> CRYING = SynchedEntityData.defineId(BabyEntity.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<String> OWNER = SynchedEntityData.defineId(BabyEntity.class, EntityDataSerializers.STRING);
+	/** Ticks left of the slump after a sugar rush. */
+	private static final EntityDataAccessor<Integer> CRASH = SynchedEntityData.defineId(BabyEntity.class, EntityDataSerializers.INT);
+	/** Changed on a changing table: this diaper stays clean twice as long. */
+	private static final EntityDataAccessor<Boolean> TABLE_FRESH = SynchedEntityData.defineId(BabyEntity.class, EntityDataSerializers.BOOLEAN);
+	private static final net.minecraft.resources.Identifier CRASH_SLOW = dev.lifestages.LifeStages.id("sugar_crash");
 	/** -1 neglected, 0-4 how many of fed / clean / rested / loved are covered. */
 	private static final EntityDataAccessor<Integer> CARE = SynchedEntityData.defineId(BabyEntity.class, EntityDataSerializers.INT);
 	/** Progress to the next stage, 0-1000. */
@@ -84,6 +89,7 @@ public class BabyEntity extends PathfinderMob {
 	private int hungerTimer;
 	private int dirtyTicks;
 	private int feedsSincePoop;
+	private int cleanTicks;
 	private int energyTimer;
 	private int cryCooldown;
 	private int calmTicks;
@@ -116,6 +122,8 @@ public class BabyEntity extends PathfinderMob {
 		builder.define(SUGAR, 0);
 		builder.define(CRYING, false);
 		builder.define(OWNER, "");
+		builder.define(CRASH, 0);
+		builder.define(TABLE_FRESH, false);
 		builder.define(CARE, 2);
 		builder.define(GROWTH, 0);
 	}
@@ -173,6 +181,28 @@ public class BabyEntity extends PathfinderMob {
 
 	public boolean sugarRush() {
 		return entityData.get(SUGAR) > 0;
+	}
+
+	/** Slumped after a sugar rush: very tired, very slow and cranky until they sleep (2 minutes at most). */
+	public boolean sugarCrash() {
+		return entityData.get(CRASH) > 0;
+	}
+
+	/** Gives a sugar rush of this many ticks (feeding sweets does this too). */
+	public void startSugarRush(int ticks) {
+		entityData.set(SUGAR, ticks);
+		entityData.set(ASLEEP, false);
+		endCrash();
+	}
+
+	/** Last changed on a changing table, so the diaper stays clean longer. */
+	public boolean freshFromTable() {
+		return entityData.get(TABLE_FRESH);
+	}
+
+	/** Feeds so far since the last dirty diaper. */
+	public int feedsSincePoop() {
+		return feedsSincePoop;
 	}
 
 	public boolean crying() {
@@ -257,6 +287,12 @@ public class BabyEntity extends PathfinderMob {
 			default -> 0.28;
 		};
 		getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(speed);
+		// Newborns and infants can't jump at all and toddlers only hop about half a block, so nobody climbs out of a
+		// crib (its rail stands 3/4 of a block above the mattress) until they can jump a full block.
+		var jump = getAttribute(Attributes.JUMP_STRENGTH);
+		if (jump != null) {
+			jump.setBaseValue(s.atMost(Stage.INFANT) ? 0.0 : s == Stage.TODDLER ? 0.25 : 0.42);
+		}
 		getAttribute(Attributes.MAX_HEALTH).setBaseValue(s.atMost(Stage.TODDLER) ? 12.0 : s.atMost(Stage.CHILD) ? 16.0 : 20.0);
 		// older children roam further from home
 		int radius = s.atMost(Stage.TODDLER) ? 16 : s == Stage.PRESCHOOLER ? 20 : s == Stage.CHILD ? 28 : 36;
@@ -317,9 +353,15 @@ public class BabyEntity extends PathfinderMob {
 			entityData.set(DIRTY, false); // out of diapers
 		}
 		// diapers: after a few feeds, or every few minutes
-		if (s.wearsDiaper() && !dirty() && (feedsSincePoop >= 3 || tickCount % (6 * 60 * 20) == 0 && tickCount > 0)) {
+		boolean fresh = freshFromTable();
+		if (s.wearsDiaper() && !dirty()) {
+			cleanTicks++;
+		}
+		if (s.wearsDiaper() && !dirty() && (feedsSincePoop >= (fresh ? 6 : 3) || cleanTicks >= (fresh ? 12 : 6) * 60 * 20)) {
 			entityData.set(DIRTY, true);
+			entityData.set(TABLE_FRESH, false);
 			dirtyTicks = 0;
+			cleanTicks = 0;
 			feedsSincePoop = 0;
 			level.playSound(null, blockPosition(), ModSounds.POOP, SoundSource.NEUTRAL, 0.7f, 1.3f);
 		}
@@ -354,7 +396,8 @@ public class BabyEntity extends PathfinderMob {
 				setEnergy(energy() - 1);
 			}
 			boolean bedtime = energy() <= 12 || energy() < 40 && (level.isDarkOutside() || carried && random.nextInt(600) == 0);
-			if (bedtime && !sugarRush() && (carried || inCrib || energy() <= 4 || random.nextInt(200) == 0)) {
+			boolean settles = carried || inCrib || !sugarCrash() && (energy() <= 4 || random.nextInt(200) == 0);
+			if (bedtime && !sugarRush() && settles) {
 				fallAsleep();
 			}
 		} else {
@@ -364,7 +407,7 @@ public class BabyEntity extends PathfinderMob {
 				setEnergy(energy() - 1);
 			}
 			boolean bedtime = energy() <= 8 || level.isDarkOutside() && energy() < 80;
-			if (bedtime && !sugarRush() && !carried) {
+			if (bedtime && !sugarRush() && !sugarCrash() && !carried) {
 				if (home != null && blockPosition().distSqr(home) > 9 && energy() > 8) {
 					if (getNavigation().isDone()) {
 						getNavigation().moveTo(home.getX() + 0.5, home.getY(), home.getZ() + 0.5, 1.0);
@@ -378,6 +421,17 @@ public class BabyEntity extends PathfinderMob {
 			entityData.set(SUGAR, entityData.get(SUGAR) - 1);
 			if (tickCount % 6 == 0) {
 				level.sendParticles(ParticleTypes.HAPPY_VILLAGER, getX(), getY() + 0.5, getZ(), 1, 0.2, 0.2, 0.2, 0.0);
+			}
+			if (entityData.get(SUGAR) == 0) {
+				startCrash();
+			}
+		}
+		if (sugarCrash()) {
+			entityData.set(CRASH, entityData.get(CRASH) - 1);
+			if (asleep() || !sugarCrash()) {
+				endCrash(); // slept it off, or two minutes passed
+			} else if (energy() > 14) {
+				setEnergy(14); // wiped out
 			}
 		}
 		// starving babies weaken
@@ -439,6 +493,9 @@ public class BabyEntity extends PathfinderMob {
 
 	/** Why the baby is upset, or null. */
 	public String need() {
+		if (sugarCrash() && !asleep()) {
+			return "crashing after all that sugar";
+		}
 		if (hunger() <= 5) {
 			return "hungry";
 		}
@@ -483,6 +540,28 @@ public class BabyEntity extends PathfinderMob {
 			if (parent.distanceToSqr(this) > 6 * 6 || random.nextInt(3) == 0) {
 				parent.sendOverlayMessage(Component.literal(getName().getString() + " is crying: " + need + "!").withStyle(ChatFormatting.LIGHT_PURPLE));
 			}
+		}
+	}
+
+	private void startCrash() {
+		entityData.set(CRASH, dev.lifestages.life.LifeManager.SUGAR_CRASH_TICKS);
+		setEnergy(Math.min(energy(), 14));
+		var speed = getAttribute(Attributes.MOVEMENT_SPEED);
+		if (speed != null && !speed.hasModifier(CRASH_SLOW)) {
+			speed.addTransientModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(CRASH_SLOW, -0.65,
+					net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+		}
+		calmTicks = 0;
+		cryCooldown = 0;
+		tell(getName().getString() + " is crashing after that sugar rush: tired, slow and cranky. Carry them or lay them in a crib for a nap.",
+				ChatFormatting.GOLD);
+	}
+
+	private void endCrash() {
+		entityData.set(CRASH, 0);
+		var speed = getAttribute(Attributes.MOVEMENT_SPEED);
+		if (speed != null) {
+			speed.removeModifier(CRASH_SLOW);
 		}
 	}
 
@@ -550,7 +629,7 @@ public class BabyEntity extends PathfinderMob {
 			}
 			feed(level, food != null ? Math.max(2, food.nutrition()) : 1);
 			if (stack.is(Feeding.SUGARY) && s.getsSugarRush()) {
-				entityData.set(SUGAR, 30 * 20);
+				startSugarRush(30 * 20);
 				entityData.set(ASLEEP, false);
 				tell(getName().getString() + " has a SUGAR RUSH! Watch out, they'll run off!", ChatFormatting.GOLD);
 			}
@@ -567,6 +646,14 @@ public class BabyEntity extends PathfinderMob {
 				return InteractionResult.SUCCESS;
 			}
 			setDirty(false);
+			boolean onTable = level.getBlockState(blockPosition()).is(ModBlocks.CHANGING_TABLE)
+					|| level.getBlockState(blockPosition().below()).is(ModBlocks.CHANGING_TABLE);
+			entityData.set(TABLE_FRESH, onTable);
+			cleanTicks = 0;
+			feedsSincePoop = 0;
+			if (onTable) {
+				hint(player, "Changed on the changing table: this diaper stays clean twice as long.");
+			}
 			stack.consume(1, player);
 			ItemStack dirtyDiaper = new ItemStack(ModItems.DIRTY_DIAPER);
 			if (player instanceof ServerPlayer sp) {
@@ -685,6 +772,9 @@ public class BabyEntity extends PathfinderMob {
 		out.putBoolean("Dirty", dirty());
 		out.putBoolean("Asleep", asleep());
 		out.putInt("GrowTicks", growTicks);
+		out.putInt("CleanTicks", cleanTicks);
+		out.putBoolean("TableFresh", freshFromTable());
+		out.putInt("Crash", entityData.get(CRASH));
 		out.putInt("Loved", lovedTicks);
 		out.putInt("CloseCalls", closeCalls);
 		if (home != null) {
@@ -703,6 +793,12 @@ public class BabyEntity extends PathfinderMob {
 		entityData.set(DIRTY, in.getBooleanOr("Dirty", false));
 		entityData.set(ASLEEP, in.getBooleanOr("Asleep", false));
 		growTicks = in.getIntOr("GrowTicks", 0);
+		cleanTicks = in.getIntOr("CleanTicks", 0);
+		entityData.set(TABLE_FRESH, in.getBooleanOr("TableFresh", false));
+		entityData.set(CRASH, in.getIntOr("Crash", 0));
+		if (entityData.get(CRASH) > 0) {
+			entityData.set(CRASH, 1); // ends cleanly on the next tick; the slow-down modifier isn't saved
+		}
 		lovedTicks = in.getIntOr("Loved", 0);
 		closeCalls = in.getIntOr("CloseCalls", 0);
 		in.getIntArray("Home").filter(a -> a.length == 3).ifPresent(a -> {

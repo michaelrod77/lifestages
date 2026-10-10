@@ -28,6 +28,8 @@ public final class LifeData {
 	public boolean diaperOn = true;
 	/** Counts down the belly rumble before an automatic poop. */
 	public int rumbleTicks;
+	/** After a sugar rush: slow and dizzy until they sleep (or this runs out). */
+	public int crashTicks;
 	// ---- fate ----
 	/** False until the player has made their first-join choice. */
 	public boolean started;
@@ -158,6 +160,7 @@ public final class LifeData {
 		stinkyTicks = 0;
 		diaperOn = s.wearsDiaper();
 		rumbleTicks = 0;
+		crashTicks = 0;
 		ghostTicks = 0;
 		lifespanTicks = 0;
 		bonusTicks = 0;
@@ -189,6 +192,7 @@ public final class LifeData {
 		d.stinkyTicks = stinkyTicks;
 		d.diaperOn = diaperOn;
 		d.rumbleTicks = rumbleTicks;
+		d.crashTicks = crashTicks;
 		d.started = started;
 		d.pendingChoice = pendingChoice;
 		d.lastWasGhost = lastWasGhost;
@@ -234,7 +238,8 @@ public final class LifeData {
 		).apply(i, Growth::new));
 	}
 
-	private record Body(boolean diaperDirty, int diaperTicks, int feedsSincePoop, int sugarTicks, int stinkyTicks, boolean diaperOn, int rumbleTicks) {
+	private record Body(boolean diaperDirty, int diaperTicks, int feedsSincePoop, int sugarTicks, int stinkyTicks, boolean diaperOn, int rumbleTicks,
+			int crashTicks) {
 		static final Codec<Body> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.BOOL.fieldOf("diaper_dirty").forGetter(Body::diaperDirty),
 				Codec.INT.fieldOf("diaper_ticks").forGetter(Body::diaperTicks),
@@ -242,7 +247,8 @@ public final class LifeData {
 				Codec.INT.fieldOf("sugar_ticks").forGetter(Body::sugarTicks),
 				Codec.INT.fieldOf("stinky_ticks").forGetter(Body::stinkyTicks),
 				Codec.BOOL.optionalFieldOf("diaper_on", true).forGetter(Body::diaperOn),
-				Codec.INT.optionalFieldOf("rumble_ticks", 0).forGetter(Body::rumbleTicks)
+				Codec.INT.optionalFieldOf("rumble_ticks", 0).forGetter(Body::rumbleTicks),
+				Codec.INT.optionalFieldOf("crash_ticks", 0).forGetter(Body::crashTicks)
 		).apply(i, Body::new));
 	}
 
@@ -291,7 +297,7 @@ public final class LifeData {
 
 	public static final Codec<LifeData> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Growth.CODEC.fieldOf("growth").forGetter(d -> new Growth(d.stage, d.stageTicks, d.milk, d.food, d.naps, d.nights, d.napTicks, d.lastNightDay)),
-			Body.CODEC.fieldOf("body").forGetter(d -> new Body(d.diaperDirty, d.diaperTicks, d.feedsSincePoop, d.sugarTicks, d.stinkyTicks, d.diaperOn, d.rumbleTicks)),
+			Body.CODEC.fieldOf("body").forGetter(d -> new Body(d.diaperDirty, d.diaperTicks, d.feedsSincePoop, d.sugarTicks, d.stinkyTicks, d.diaperOn, d.rumbleTicks, d.crashTicks)),
 			Fate.CODEC.fieldOf("fate").forGetter(d -> new Fate(d.started, d.pendingChoice, d.lastWasGhost, d.ghostTicks, d.lifespanTicks, d.bonusTicks, d.presents)),
 			Family.CODEC.fieldOf("family").forGetter(d -> new Family(d.parents, d.children, d.allowCarry, d.lookingForBaby, d.starterPacks, d.lookingForParent)),
 			Mom.CODEC.optionalFieldOf("mom", new Mom(false, 0, 0, false)).forGetter(d -> new Mom(d.momAssigned, d.momLook, d.momDeathAge, d.momDead)),
@@ -313,6 +319,7 @@ public final class LifeData {
 		d.stinkyTicks = b.stinkyTicks;
 		d.diaperOn = b.diaperOn;
 		d.rumbleTicks = b.rumbleTicks;
+		d.crashTicks = b.crashTicks;
 		d.started = f.started;
 		d.pendingChoice = f.pendingChoice;
 		d.lastWasGhost = f.lastWasGhost;

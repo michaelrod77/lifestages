@@ -46,8 +46,8 @@ On first join you choose Adult (you start as a Young Adult, age 18, listed as lo
 
 When you reach Adult, your birthday present holds four Baby Spawn Eggs. Use one on the ground to have a baby (use as many as you like). Your baby is curious: it crawls (later toddles) around its home, off to animals, flowers and anything you drop. The top-left of your screen shows each nearby baby's food, rest and diaper.
 
-- Feed it: a newborn only drinks milk; after that it eats just about anything. Anything sugary gives a sugar rush, and it runs off, sometimes toward water, drops or monsters.
-- Change it with a clean diaper when it's dirty.
+- Feed it: a newborn only drinks milk; after that it eats just about anything. Anything sugary gives a sugar rush, and it runs off, sometimes toward water, drops or monsters. When the rush wears off it crashes: very tired, very slow and cranky until it naps (carry it or lay it in a crib), two minutes at most. Player children crash too: slow and dizzy until they sleep.
+- Change it with a clean diaper when it's dirty. Changed on a changing table, the diaper stays clean twice as long.
 - Let it sleep: a tired baby naps where it is, or right-click with an empty hand to pick it up and right-click a crib to lay it down (cribs rest it twice as fast). Right-click a changing table while carrying them to put them on it.
 - Cuddle someone else's baby (empty hand) or play with a rattle or teddy bear to stop the crying. Your own baby is picked up instead.
 - Keep it safe: monsters go after babies, and babies can fall or drown. A baby is never lost: if it would have been badly hurt, it's rushed home and you hear about the close call.

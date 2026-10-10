@@ -69,7 +69,15 @@ public final class LifeManager {
 			d.sugarTicks--;
 			if (d.sugarTicks == 0) {
 				dirty = true;
+				sugarCrash(player, d);
 			}
+		}
+		if (d.crashTicks > 0) {
+			// The crash lasts until they sleep it off (a nap or a night), or 2 minutes at most.
+			if (--d.crashTicks == 0 || player.isSleeping() || d.napTicks > 0) {
+				endSugarCrash(player, d);
+			}
+			dirty = true;
 		}
 		if (stage.isBaby()) {
 			// Babies burn through milk fast: about one hunger point every 15 seconds, with no saturation to spare.
@@ -199,6 +207,29 @@ public final class LifeManager {
 		}
 		return changed;
 	}
+
+	/** What goes up comes down: after a sugar rush, a child is slow and dizzy until they sleep (2 minutes at most). */
+	public static void sugarCrash(ServerPlayer player, LifeData d) {
+		int ticks = SUGAR_CRASH_TICKS;
+		d.crashTicks = ticks;
+		player.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOWNESS, ticks, 1, false, false, true));
+		player.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.NAUSEA, ticks, 0, false, false, true));
+		player.sendOverlayMessage(Component.literal("Sugar crash... you feel slow and dizzy. A nap will help.").withStyle(ChatFormatting.GRAY));
+	}
+
+	public static void endSugarCrash(ServerPlayer player, LifeData d) {
+		d.crashTicks = 0;
+		var slow = player.getEffect(net.minecraft.world.effect.MobEffects.SLOWNESS);
+		if (slow != null && slow.getDuration() <= SUGAR_CRASH_TICKS && !slow.isVisible()) {
+			player.removeEffect(net.minecraft.world.effect.MobEffects.SLOWNESS);
+		}
+		var dizzy = player.getEffect(net.minecraft.world.effect.MobEffects.NAUSEA);
+		if (dizzy != null && dizzy.getDuration() <= SUGAR_CRASH_TICKS && !dizzy.isVisible()) {
+			player.removeEffect(net.minecraft.world.effect.MobEffects.NAUSEA);
+		}
+	}
+
+	public static final int SUGAR_CRASH_TICKS = 2 * 60 * 20;
 
 	/** Lying still in a bed or crib, or held still in someone's arms. */
 	public static boolean napping(ServerPlayer player) {

@@ -50,6 +50,10 @@ public final class Hud {
 			g.centeredText(mc.font, "SUGAR RUSH " + (d.sugarTicks / 20 + 1) + "s", cx, line, 0xFFF2A2BE);
 			line += 10;
 		}
+		if (d.crashTicks > 0) {
+			g.centeredText(mc.font, "Sugar crash: sleep it off (" + (d.crashTicks / 20 + 1) + "s)", cx, line, 0xFFB0A0C8);
+			line += 10;
+		}
 		if (d.rumbleTicks > 0) {
 			g.centeredText(mc.font, "*rumble rumble*", cx, line, 0xFFE0B060);
 			line += 10;
@@ -192,7 +196,8 @@ public final class Hud {
 				y += 26;
 				continue;
 			}
-			String status = b.crying() ? "  crying!" : b.asleep() ? "  Zzz" : b.sugarRush() ? "  SUGAR RUSH" : "";
+			String status = b.sugarCrash() && !b.asleep() ? "  sugar crash!" : b.crying() ? "  crying!" : b.asleep() ? "  Zzz"
+					: b.sugarRush() ? "  SUGAR RUSH" : "";
 			int statusColor = b.crying() ? 0xFFFF8080 : b.asleep() ? 0xFFB8D8F8 : 0xFFF2A2BE;
 			g.fill(2, y - 2, 150, y + 40, 0x70000000);
 			g.text(mc.font, name, 5, y, 0xFFF2E6C8);
@@ -204,7 +209,7 @@ public final class Hud {
 			String careText = care < 0 ? "Care: needs you!" : care >= 4 ? "Care: great (x2 growth)"
 					: care == 3 ? "Care: good" : care == 2 ? "Care: okay" : "Care: poor (slow growth)";
 			int careColor = care < 0 ? 0xFFFF8080 : care >= 4 ? 0xFF9ED9C0 : care >= 2 ? 0xFFE0E0C0 : 0xFFE0A060;
-			String diaper = b.stage().wearsDiaper() ? (b.dirty() ? "Diaper: dirty!  " : "Diaper: clean  ") : "";
+			String diaper = b.stage().wearsDiaper() ? (b.dirty() ? "Diaper: dirty!  " : b.freshFromTable() ? "Diaper: extra clean  " : "Diaper: clean  ") : "";
 			g.text(mc.font, diaper, 5, y + 20, b.dirty() ? 0xFFC8B060 : 0xFF9ED9C0);
 			g.text(mc.font, careText, 5 + mc.font.width(diaper), y + 20, careColor);
 			needBar(g, mc, "To " + b.stage().next().label, b.growth(), 5, y + 30, 0xFFC7B5EE, false, 50);

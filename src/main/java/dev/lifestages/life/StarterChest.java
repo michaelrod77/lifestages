@@ -50,13 +50,14 @@ public final class StarterChest {
 		Life.save(parent, d);
 		parent.sendSystemMessage(Component.literal("A starter chest for " + babyName + " appeared at "
 				+ pos.getX() + ", " + pos.getY() + ", " + pos.getZ()
-				+ ": a crib, 32 diapers, a rattle, 64 milk bottles, a trash can and a music box.")
+				+ ": a crib, a changing table, 32 diapers, a rattle, 64 milk bottles, a trash can and a music box.")
 				.withStyle(ChatFormatting.LIGHT_PURPLE));
 	}
 
 	private static void fill(Container chest) {
 		int[] slot = {0};
 		add(chest, slot, ModBlocks.CRIB.asItem(), 1);
+		add(chest, slot, ModBlocks.CHANGING_TABLE.asItem(), 1);
 		add(chest, slot, ModItems.CLEAN_DIAPER, 32);
 		add(chest, slot, ModItems.RATTLE, 1);
 		add(chest, slot, ModItems.MILK_BOTTLE, 64);

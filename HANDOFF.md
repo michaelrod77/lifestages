@@ -6,7 +6,7 @@ A Fabric mod for Minecraft Java **26.3**. Players live a whole life (Newborn to 
 - **Design doc (Claude Docs):** https://claude.ai/code/artifact/ef358590-8e4f-4490-b749-e35651303602. The table under "Changes from playtesting" gets one row per change, every round.
 - **Texture gallery (artifact):** https://claude.ai/artifact/CxEPJzCLLQZLT6ks4VNtLJ (built by `tools/textures/build_gallery.py`, republished to the same URL).
 - **Memory note:** `C:\Users\micha\.claude\projects\C--dev-wptournaments\memory\life-stages-mod.md` (decisions per round).
-- **Git:** repo initialized on `master`, **nothing committed**. Commit only when the user asks.
+- **Git:** `master`, pushed to https://github.com/michaelrod77/lifestages. **After every update: commit, rebuild the jar, and push.** The built jar `build/libs/lifestages-0.1.0.jar` is tracked on purpose so the other test machines can `git pull` and copy it into their mods folder.
 
 ## Working with the user
 
@@ -16,6 +16,7 @@ A Fabric mod for Minecraft Java **26.3**. Players live a whole life (Newborn to 
   1. Run both game tests.
   2. Copy the jar to the modpack.
   3. Update the README and add rows to the design doc's playtesting table.
+  4. Commit (with the rebuilt jar) and push to GitHub.
 - Say what you did not see working (UI changes made after the last test run, for example).
 - Ask before closing their apps. Memory on this PC is tight: if a test run fails to start, check for running `javaw` processes and free memory, then ask them to close Minecraft and CurseForge.
 - The PC sometimes goes to sleep during long runs. The log time jumps by hours and the background task times out. That is not a mod bug; just rerun.
@@ -127,7 +128,16 @@ cp build/libs/lifestages-0.1.0.jar "$USERPROFILE/curseforge/minecraft/Instances/
   - Renderers: Mom, NPC baby, player overlay (including the carrier).
   - `PlayerModelMixin`: baby proportions.
 
-## State of the last round (round 15)
+## State of the last round (round 16)
+
+| Change | Status |
+|---|---|
+| Right-clicking a crib with a baby in it picks the baby up (the crib's rails catch the click before the baby) | Done, tested (NPC baby) |
+| Starter chest includes a changing table. A diaper changed on the changing table stays clean twice as long (6 feeds or 12 minutes instead of 3 or 6) | Done, tested |
+| NPC babies can't hop out of cribs: newborns and infants can't jump, toddlers hop about half a block (the rail is 3/4 of a block) | Done, tested (jump strength values) |
+| Sugar crash: when a rush wears off, NPC babies are very tired, very slow (-65%) and cranky, and only nap when carried or in a crib; player children get Slowness II and Nausea. Ends when they sleep, 2 minutes at most | Done, tested |
+
+## State of the previous round (round 15)
 
 | Change | Status |
 |---|---|
