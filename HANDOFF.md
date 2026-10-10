@@ -128,7 +128,14 @@ cp build/libs/lifestages-0.1.0.jar "$USERPROFILE/curseforge/minecraft/Instances/
   - Renderers: Mom, NPC baby, player overlay (including the carrier).
   - `PlayerModelMixin`: baby proportions.
 
-## State of the last round (round 17)
+## State of the last round (round 18)
+
+| Change | Status |
+|---|---|
+| Starting as a Young Adult (or an Elder) gives a white bed | Done, tested (Adult) |
+| The chosen baby look carries through every stage (it always did: `look` picks `baby_N`, `kid_N`, `teen_N`); "Meet your baby" now shows the chosen look as a child and a teen | Done, look-after-growing tested; the preview panel not screenshot-checked |
+
+## State of the previous round (round 17)
 
 | Change | Status |
 |---|---|

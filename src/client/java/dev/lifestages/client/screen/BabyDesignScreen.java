@@ -34,9 +34,12 @@ public class BabyDesignScreen extends Screen {
 		return Math.max(62, height / 2 - CARD_H / 2);
 	}
 
+	/** The four baby cards, then a "grows up like" panel to their right. */
 	private int left() {
-		return width / 2 - (LOOKS * CARD_W + (LOOKS - 1) * 8) / 2;
+		return width / 2 - (LOOKS * CARD_W + (LOOKS - 1) * 8 + 8 + GROWN_W) / 2;
 	}
+
+	private static final int GROWN_W = 70;
 
 	@Override
 	protected void init() {
@@ -105,6 +108,14 @@ public class BabyDesignScreen extends Screen {
 			SkinDoll.draw(g, LifeStages.id("textures/entity/baby/baby_" + (i + 1) + ".png"), x + CARD_W / 2, y + 8, SCALE);
 			g.centeredText(font, chosen ? "Chosen" : "Look " + (i + 1), x + CARD_W / 2, y + CARD_H - 13, chosen ? 0xFFFFE0EC : 0xFFE0E0E0);
 		}
+		// The chosen look carries through every stage: the same face and hair, outfits in matching colours.
+		int gx = left() + LOOKS * (CARD_W + 8);
+		g.fill(gx, y, gx + GROWN_W, y + CARD_H, 0x90000000);
+		g.centeredText(font, "Grows up", gx + GROWN_W / 2, y + 4, 0xFFB8B8C8);
+		SkinDoll.draw(g, LifeStages.id("textures/entity/baby/kid_" + look + ".png"), gx + GROWN_W / 4 + 1, y + 26, 2);
+		SkinDoll.draw(g, LifeStages.id("textures/entity/baby/teen_" + look + ".png"), gx + GROWN_W * 3 / 4 - 1, y + 26, 2);
+		g.centeredText(font, "Child", gx + GROWN_W / 4 + 1, y + 26 + SkinDoll.height(2) + 4, 0xFFE0E0E0);
+		g.centeredText(font, "Teen", gx + GROWN_W * 3 / 4 - 1, y + 26 + SkinDoll.height(2) + 4, 0xFFE0E0E0);
 	}
 
 	@Override

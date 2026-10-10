@@ -67,7 +67,8 @@ public final class Choices {
 
 		switch (option) {
 			case ADULT -> {
-				player.sendSystemMessage(Component.literal("You begin life as a Young Adult, age 18.").withStyle(ChatFormatting.GOLD));
+				dev.lifestages.util.Give.item(player, new ItemStack(net.minecraft.world.item.Items.BED.white())); // somewhere to sleep from night one
+				player.sendSystemMessage(Component.literal("You begin life as a Young Adult, age 18, with a bed to sleep in.").withStyle(ChatFormatting.GOLD));
 				player.sendSystemMessage(Component.literal("New babies can choose you as their parent (turn this off in the Journal, J).")
 						.withStyle(ChatFormatting.GRAY));
 				player.sendSystemMessage(Component.literal("When a baby connects with you, a starter chest appears beside you: "
@@ -77,7 +78,8 @@ public final class Choices {
 			case ELDERLY -> {
 				player.giveExperienceLevels(5);
 				dev.lifestages.util.Give.item(player, new ItemStack(ModItems.WALKING_CANE));
-				player.sendSystemMessage(Component.literal("You begin life as an Elder, age 65, with a little wisdom.").withStyle(ChatFormatting.GOLD));
+				dev.lifestages.util.Give.item(player, new ItemStack(net.minecraft.world.item.Items.BED.white()));
+				player.sendSystemMessage(Component.literal("You begin life as an Elder, age 65, with a little wisdom (and a bed).").withStyle(ChatFormatting.GOLD));
 			}
 			case BABY -> startBaby(player, d, parent);
 			default -> {

@@ -678,8 +678,14 @@ public class LifeStagesClientTest implements FabricClientGameTest {
 			check(server.computeOnServer(s -> {
 				var p = s.getPlayerList().getPlayers().get(0);
 				var b = p.level().getEntitiesOfClass(dev.lifestages.entity.BabyEntity.class, p.getBoundingBox().inflate(8)).get(0);
-				return "Pip".equals(b.getName().getString()) && b.look() == 3;
-			}), "the new baby did not get the chosen name and look");
+				boolean chosen = "Pip".equals(b.getName().getString()) && b.look() == 3;
+				// the look carries through growing up
+				var was = b.stage();
+				b.setStage(Stage.TEENAGER);
+				boolean kept = b.look() == 3;
+				b.setStage(was);
+				return chosen && kept;
+			}), "the new baby did not get the chosen name and look (or lost the look growing up)");
 			check(server.computeOnServer(s -> {
 				var p = s.getPlayerList().getPlayers().get(0);
 				var babies = p.level().getEntitiesOfClass(dev.lifestages.entity.BabyEntity.class, p.getBoundingBox().inflate(8));
@@ -974,6 +980,8 @@ public class LifeStagesClientTest implements FabricClientGameTest {
 			ctx.runOnClient(mc -> mc.setScreenAndShow(null));
 			ctx.waitTicks(20);
 			check(server.computeOnServer(s -> Life.stage(s.getPlayerList().getPlayers().get(0))) == Stage.YOUNG_ADULT, "respawn as Adult failed");
+			check(server.computeOnServer(s -> s.getPlayerList().getPlayers().get(0).getInventory()
+					.contains(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BED.white()))), "a new Young Adult did not start with a bed");
 
 			// 12. Adults start with an empty inventory (the nursery arrives as a chest per baby), and ordinary items work.
 			check(server.computeOnServer(s -> {
