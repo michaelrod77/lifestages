@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:cocoa_beans",
+    "minecraft:sugar",
+    [
+      "minecraft:milk_bucket",
+      "lifestages:milk_bottle"
+    ]
+  ],
+  "result": {
+    "id": "lifestages:chocolate_bunny",
+    "count": 2
+  }
+}

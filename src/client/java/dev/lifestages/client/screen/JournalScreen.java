@@ -63,7 +63,9 @@ public class JournalScreen extends Screen {
 		g.text(font, Component.literal(s.label).withStyle(net.minecraft.ChatFormatting.GOLD), x, y, 0xFFFFFFFF);
 		g.text(font, ageText(age), x + 110, y, 0xFFD0D0DA);
 		y += 16;
-		if (s == Stage.ELDERLY) {
+		if (s == Stage.OLD_CAT) {
+			g.text(font, "An old cat now. Enjoy the naps.", x, y, 0xFFD0D0DA);
+		} else if (s.isFinal()) {
 			g.text(font, "Your time is running out. Golden foods add a little.", x, y, 0xFFD0D0DA);
 		} else {
 			int minTicks = d.requiredTicks(ClientLife.lifeLengthMultiplier);
@@ -76,7 +78,7 @@ public class JournalScreen extends Screen {
 				y += 14;
 			}
 			if (s.food > 0) {
-				bar(g, x, y, "Food", d.food, s.food, d.food + " / " + s.food + " points");
+				bar(g, x, y, s.isPet() ? "Fish" : "Food", d.food, s.food, d.food + " / " + s.food + " points");
 				y += 14;
 			}
 			if (s.naps > 0) {
@@ -99,9 +101,11 @@ public class JournalScreen extends Screen {
 			g.text(font, "Sugar rush: " + d.sugarTicks / 20 + " s", x, y, 0xFFF2A2BE);
 			y += 12;
 		}
-		g.text(font, "Parents: " + names(d.parents), x, y, 0xFFD0D0DA);
+		g.text(font, (s.isPet() ? "Family: " : "Parents: ") + names(d.parents), x, y, 0xFFD0D0DA);
 		y += 12;
-		g.text(font, "Children: " + names(d.children), x, y, 0xFFD0D0DA);
+		if (!s.isPet()) {
+			g.text(font, "Children: " + names(d.children), x, y, 0xFFD0D0DA);
+		}
 		y += 16;
 		String tip = tip(d);
 		if (tip != null) {
@@ -132,6 +136,12 @@ public class JournalScreen extends Screen {
 
 	private static String tip(LifeData d) {
 		Stage s = d.stage();
+		if (s == Stage.KITTEN) {
+			return "Tip: Meow (Z) when you're hungry: your family brings milk bottles. Sneak to curl up for a nap. Sprint for a quick dash.";
+		}
+		if (s == Stage.CAT) {
+			return "Tip: Cats eat fish, any kind, from someone's hand. Nap (sneak), sleep through a night, and go for walks on your lead.";
+		}
 		if (s.isNewborn()) {
 			return "Tip: Mom feeds you a bottle about every 1-2 minutes and rocks you to sleep. Stay still while napping. Cry (Z) if you need her sooner.";
 		}

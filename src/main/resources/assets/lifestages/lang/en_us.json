@@ -47,5 +47,8 @@
   "entity.lifestages.baby": "Baby",
   "item.lifestages.baby_spawn_egg": "Baby Spawn Egg",
   "key.lifestages.emotes": "Emote wheel",
-  "key.lifestages.family": "Ask to be family"
+  "key.lifestages.family": "Ask to be family",
+  "block.lifestages.easter_egg": "Easter Egg",
+  "block.lifestages.christmas_tree": "Christmas Tree",
+  "item.lifestages.chocolate_bunny": "Chocolate Bunny"
 }

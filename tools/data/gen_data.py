@@ -86,7 +86,7 @@ write(f'data/{NS}/tags/item/soft_foods.json', {'values': [
     'minecraft:bread', 'minecraft:apple', 'minecraft:carrot', 'minecraft:baked_potato', 'minecraft:sweet_berries',
     'minecraft:melon_slice', 'minecraft:cookie', 'minecraft:pumpkin_pie', f'{NS}:milk_bottle', 'minecraft:honey_bottle']})
 write(f'data/{NS}/tags/item/sugary.json', {'values': [
-    'minecraft:cookie', 'minecraft:cake', 'minecraft:pumpkin_pie', 'minecraft:honey_bottle', 'minecraft:sugar']})
+    'minecraft:cookie', 'minecraft:cake', 'minecraft:pumpkin_pie', 'minecraft:honey_bottle', 'minecraft:sugar', f'{NS}:chocolate_bunny']})
 
 # ---------------- recipes ----------------
 for n in (1, 2, 3):
@@ -410,5 +410,62 @@ adv('parenthood', 'Parenthood', 'Have a baby with a Baby Spawn Egg.', f'{NS}:bab
 adv('raised_right', 'Raised Right', 'Raise an NPC baby all the way to a Young Adult.', 'minecraft:cake', frame='challenge')
 
 adv('home_sweet_home', 'Home Sweet Home', 'Your NPC Mom finished building your house.', 'minecraft:oak_door')
+
+# ---------- pet cats ----------
+adv('nine_lives', 'Nine Lives', 'Begin a life as the family cat.', 'minecraft:string')
+adv('top_cat', 'Top Cat', 'Grow from a Kitten into a Cat.', 'minecraft:salmon', parent='nine_lives')
+adv('walkies', 'Walkies!', 'Go for a walk on a lead as a pet cat.', 'minecraft:lead', parent='nine_lives')
+adv('cat_person', 'Cat Person', 'Take in a pet cat.', 'minecraft:cod')
+
+# ---------- holidays ----------
+item('chocolate_bunny')
+write(f'data/{NS}/recipe/chocolate_bunny.json', {
+    'type': 'minecraft:crafting_shapeless', 'category': 'misc',
+    'ingredients': ['minecraft:cocoa_beans', 'minecraft:sugar', ['minecraft:milk_bucket', f'{NS}:milk_bottle']],
+    'result': {'id': f'{NS}:chocolate_bunny', 'count': 2}})
+
+# Easter eggs: a little egg shape in six pastel designs
+EGG = [([6, 0, 6], [10, 1, 10]), ([5, 1, 5], [11, 6, 11]), ([5.5, 6, 5.5], [10.5, 8, 10.5]), ([6.5, 8, 6.5], [9.5, 9, 9.5])]
+for i in range(6):
+    write(f'assets/{NS}/models/block/easter_egg_{i}.json', {
+        'textures': {'shell': f'{NS}:block/easter_egg_{i}', 'particle': f'{NS}:block/easter_egg_{i}'},
+        'elements': [{'from': a, 'to': b, 'faces': faces('#shell')} for a, b in EGG]})
+write(f'assets/{NS}/blockstates/easter_egg.json', {'variants': {f'design={i}': {'model': f'{NS}:block/easter_egg_{i}'} for i in range(6)}})
+item('easter_egg')
+
+# The Christmas tree: two blocks tall, tiers narrowing to a star
+def tiers(rows):
+    return [{'from': [8 - w, y0, 8 - w], 'to': [8 + w, y1, 8 + w], 'faces': faces(tex)} for y0, y1, w, tex in rows]
+
+
+write(f'assets/{NS}/models/block/christmas_tree_lower.json', {
+    'ambientocclusion': False,
+    'textures': {'leaves': f'{NS}:block/christmas_tree_leaves', 'trunk': f'{NS}:block/christmas_tree_trunk',
+                 'particle': f'{NS}:block/christmas_tree_leaves'},
+    'elements': tiers([(0, 3, 1.5, '#trunk'), (3, 8, 7, '#leaves'), (8, 13, 5.5, '#leaves'), (13, 16, 4.5, '#leaves')])})
+write(f'assets/{NS}/models/block/christmas_tree_upper.json', {
+    'ambientocclusion': False,
+    'textures': {'leaves': f'{NS}:block/christmas_tree_leaves', 'star': f'{NS}:block/christmas_tree_star',
+                 'particle': f'{NS}:block/christmas_tree_leaves'},
+    'elements': tiers([(0, 2, 4.5, '#leaves'), (2, 7, 3.5, '#leaves'), (7, 11, 2, '#leaves'), (11, 14, 1, '#star')])
+    + [{'from': [6, 12, 7.5], 'to': [10, 13, 8.5], 'faces': faces('#star')}]})
+write(f'assets/{NS}/blockstates/christmas_tree.json', {'variants': {
+    'half=lower': {'model': f'{NS}:block/christmas_tree_lower'}, 'half=upper': {'model': f'{NS}:block/christmas_tree_upper'}}})
+item('christmas_tree')
+
+adv('egg_hunter', 'Egg Hunter', 'Find 5 Easter eggs.', f'{NS}:easter_egg')
+adv('trick_or_treat', 'Trick or Treat!', 'Visit 5 Trick-or-Treaters on Halloween.', 'minecraft:jack_o_lantern')
+
+# ---------- names ----------
+LANG = os.path.join(RES, 'assets', NS, 'lang', 'en_us.json')
+with open(LANG, encoding='utf-8') as f:
+    lang = json.load(f)
+lang.update({
+    'block.lifestages.easter_egg': 'Easter Egg',
+    'block.lifestages.christmas_tree': 'Christmas Tree',
+    'item.lifestages.chocolate_bunny': 'Chocolate Bunny',
+})
+with open(LANG, 'w', encoding='utf-8') as f:
+    json.dump(lang, f, indent=2, ensure_ascii=False)
 
 print('data written')

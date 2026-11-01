@@ -45,6 +45,13 @@ public final class ModBlocks {
 	public static final Block TRASH_CAN = register("trash_can", dev.lifestages.block.TrashCanBlock::new,
 			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_GREEN).strength(1.5f, 6.0f).sound(SoundType.LANTERN).noOcclusion(), true);
 
+	/** Holidays: Easter eggs hidden around home, and the Christmas tree (both gone the next morning). */
+	public static final Block EASTER_EGG = register("easter_egg", dev.lifestages.block.EasterEggBlock::new,
+			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PINK).strength(0.2f).sound(SoundType.DECORATED_POT).noOcclusion().noLootTable(), true);
+	public static final Block CHRISTMAS_TREE = register("christmas_tree", dev.lifestages.block.ChristmasTreeBlock::new,
+			BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GREEN).strength(0.5f).sound(SoundType.GRASS).noOcclusion().noLootTable()
+					.lightLevel(s -> 10), true);
+
 	/** Birthday presents, rarer the older you are. Placeable; open them like a four-slot chest. */
 	public static final Block PRESENT_COMMON = present("common", Rarity.COMMON, MapColor.COLOR_PINK);
 	public static final Block PRESENT_UNCOMMON = present("uncommon", Rarity.UNCOMMON, MapColor.COLOR_LIGHT_GREEN);
@@ -102,6 +109,7 @@ public final class ModBlocks {
 			case TEENAGER, YOUNG_ADULT -> PRESENT_RARE;
 			case ADULT, MIDDLE_AGE -> PRESENT_EPIC;
 			case SENIOR, ELDERLY -> PRESENT_LEGENDARY;
+			case KITTEN, CAT, OLD_CAT -> PRESENT_COMMON;
 		};
 	}
 
@@ -116,6 +124,8 @@ public final class ModBlocks {
 		out.accept(PRESENT_RARE);
 		out.accept(PRESENT_EPIC);
 		out.accept(PRESENT_LEGENDARY);
+		out.accept(EASTER_EGG);
+		out.accept(CHRISTMAS_TREE);
 		out.accept(GRAVESTONE);
 		out.accept(WILL_CHEST);
 	}

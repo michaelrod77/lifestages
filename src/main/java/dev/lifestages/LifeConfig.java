@@ -27,6 +27,10 @@ public final class LifeConfig {
 	public int elderlyLifespanMaxMinutes = 25;
 	public double sugarRushSpeed = 2.5;
 	public int sugarRushSeconds = 30;
+	/** Easter, Halloween or Christmas every few days (this many days apart, chosen at random in the range). */
+	public boolean holidaysEnabled = true;
+	public int holidayMinDays = 3;
+	public int holidayMaxDays = 5;
 
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 	private static LifeConfig instance = new LifeConfig();

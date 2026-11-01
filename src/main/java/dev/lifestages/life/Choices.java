@@ -12,9 +12,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.portal.TeleportTransition;
 
-/** The first-join and respawn choice: 1 Adult, 2 Baby, 3 Elderly, 4 Ghost. */
+/** The first-join and respawn choice: 1 Adult, 2 Baby, 3 Elderly, 4 Ghost, 5 Pet Cat. */
 public final class Choices {
-	public static final int ADULT = 1, BABY = 2, ELDERLY = 3, GHOST = 4;
+	public static final int ADULT = 1, BABY = 2, ELDERLY = 3, GHOST = 4, PET = 5;
 
 	private Choices() {
 	}
@@ -24,14 +24,14 @@ public final class Choices {
 		choose(player, option, parent, 0);
 	}
 
-	/** momLook: which of the six Moms a Baby wants (1-6), or 0 for a surprise. */
+	/** momLook: which of the six Moms a Baby wants (1-6), or which cat a Pet is (1-11); 0 for a surprise. */
 	public static void choose(ServerPlayer player, int option, UUID parent, int momLook) {
 		LifeData d = Life.of(player);
 		if (d.started && d.pendingChoice == 0) {
 			return;
 		}
 		boolean firstJoin = !d.started;
-		if (option < ADULT || option > GHOST || (firstJoin && option > BABY) || (option == GHOST && d.lastWasGhost)) {
+		if (option < ADULT || option > PET || (firstJoin && (option == ELDERLY || option == GHOST)) || (option == GHOST && d.lastWasGhost)) {
 			return;
 		}
 		if (option == GHOST) {
@@ -42,10 +42,16 @@ public final class Choices {
 		Moms.onLeave(player); // the previous life's Mom goes with that life
 		boolean wasGhost = player.isSpectator();
 		d.lastWasGhost = false;
-		Stage start = option == ADULT ? Stage.YOUNG_ADULT : option == BABY ? Stage.NEWBORN : Stage.ELDERLY;
+		Stage start = option == ADULT ? Stage.YOUNG_ADULT : option == BABY ? Stage.NEWBORN : option == PET ? Stage.KITTEN : Stage.ELDERLY;
+		Pets.unclip(player, d, false);
 		d.newLife(start);
 		if (option == BABY && momLook >= 1 && momLook <= 6) {
 			d.momLook = momLook;
+		}
+		if (option == PET) {
+			d.petLook = momLook >= 1 && momLook <= Pets.NAMES.length ? momLook - 1 : player.getRandom().nextInt(Pets.NAMES.length);
+		} else {
+			Pets.clear(player);
 		}
 		if (option == ADULT) {
 			d.lookingForBaby = true; // new players almost always want this; it can be turned off in the Journal
@@ -82,6 +88,7 @@ public final class Choices {
 				player.sendSystemMessage(Component.literal("You begin life as an Elder, age 65, with a little wisdom (and a bed).").withStyle(ChatFormatting.GOLD));
 			}
 			case BABY -> startBaby(player, d, parent);
+			case PET -> startPet(player, d, parent);
 			default -> {
 			}
 		}
@@ -106,6 +113,28 @@ public final class Choices {
 			return;
 		}
 		Moms.assign(baby);
+	}
+
+	private static void startPet(ServerPlayer pet, LifeData d, UUID ownerId) {
+		dev.lifestages.util.Give.item(pet, new ItemStack(net.minecraft.world.item.Items.LEAD));
+		pet.sendSystemMessage(Component.literal("Meow! You're the family's " + Pets.NAMES[d.petLook] + " Kitten.").withStyle(ChatFormatting.LIGHT_PURPLE));
+		pet.sendSystemMessage(Component.literal("Cats can't feed themselves: your family gives you milk bottles while you're a Kitten, "
+				+ "and fish once you're a Cat. Hold Z to meow for them (or hiss, or purr). Sneak to curl up for a nap.").withStyle(ChatFormatting.GRAY));
+		pet.sendSystemMessage(Component.literal("You jump twice as high, sprint in quick bursts, always land on your feet, and see in the dark at night. "
+				+ "You brought a lead: right-click someone in your family with it and they'll take you for a walk.").withStyle(ChatFormatting.GRAY));
+		ModAdvancements.award(pet, "nine_lives");
+		ServerPlayer owner = ownerId == null ? null : pet.level().getServer().getPlayerList().getPlayer(ownerId);
+		if (owner == null) {
+			owner = Family.online(pet.level().getServer(), d.parents).stream()
+					.filter(p -> Life.of(p).started && Life.stage(p).canParent()).findFirst().orElse(null);
+		}
+		if (owner != null && Life.stage(owner).canParent()) {
+			Pets.adopt(owner, pet);
+			pet.teleport(new TeleportTransition(owner.level(), owner.position().add(owner.getLookAngle().multiply(1, 0, 1).normalize()),
+					net.minecraft.world.phys.Vec3.ZERO, pet.getYRot(), pet.getXRot(), TeleportTransition.DO_NOTHING));
+			return;
+		}
+		Moms.assign(pet); // nobody to look after the kitten: an NPC Mom takes them in
 	}
 
 	/** Parents who are online and looking for a baby, for the choice screen's parent list. */

@@ -1,0 +1,28 @@
+{
+  "display": {
+    "icon": {
+      "id": "lifestages:easter_egg"
+    },
+    "title": {
+      "text": "Egg Hunter"
+    },
+    "description": {
+      "text": "Find 5 Easter eggs."
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ],
+  "parent": "lifestages:root"
+}

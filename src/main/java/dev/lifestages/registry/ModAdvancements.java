@@ -33,6 +33,7 @@ public final class ModAdvancements {
 			case MIDDLE_AGE -> "midlife_crisis";
 			case SENIOR -> "senior_discount";
 			case ELDERLY -> "golden_years";
+			case CAT -> "top_cat";
 			default -> null;
 		};
 		if (name != null) {

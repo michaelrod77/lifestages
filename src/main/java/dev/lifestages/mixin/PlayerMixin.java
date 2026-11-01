@@ -33,4 +33,21 @@ public abstract class PlayerMixin {
 			cir.setReturnValue(Pose.SWIMMING);
 		}
 	}
+
+	/** A pet cat sounds like a cat when hurt. */
+	@Inject(method = "getHurtSound", at = @At("HEAD"), cancellable = true)
+	private void lifestages$catHurt(net.minecraft.world.damagesource.DamageSource source, CallbackInfoReturnable<net.minecraft.sounds.SoundEvent> cir) {
+		Player self = (Player) (Object) this;
+		if (dev.lifestages.life.Pets.isPet(self)) {
+			cir.setReturnValue(dev.lifestages.life.Pets.sound(self, net.minecraft.world.entity.animal.feline.CatSoundVariant.CatSoundSet::hurtSound));
+		}
+	}
+
+	@Inject(method = "getDeathSound", at = @At("HEAD"), cancellable = true)
+	private void lifestages$catDeath(CallbackInfoReturnable<net.minecraft.sounds.SoundEvent> cir) {
+		Player self = (Player) (Object) this;
+		if (dev.lifestages.life.Pets.isPet(self)) {
+			cir.setReturnValue(dev.lifestages.life.Pets.sound(self, net.minecraft.world.entity.animal.feline.CatSoundVariant.CatSoundSet::deathSound));
+		}
+	}
 }

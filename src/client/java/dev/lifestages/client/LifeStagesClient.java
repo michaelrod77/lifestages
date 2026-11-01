@@ -56,12 +56,18 @@ public class LifeStagesClient implements ClientModInitializer {
 			Minecraft mc = ctx.client();
 			if (mc.gui.screen() instanceof ChoiceScreen open) {
 				open.updateParents(p.parents()); // keep the parent list live while choosing
-			} else if (!(mc.gui.screen() instanceof dev.lifestages.client.screen.MomPickerScreen)) {
+			} else if (!(mc.gui.screen() instanceof dev.lifestages.client.screen.MomPickerScreen)
+					&& !(mc.gui.screen() instanceof dev.lifestages.client.screen.PetPickerScreen)) {
 				mc.setScreenAndShow(new ChoiceScreen(p.mode(), p.ghostLocked(), p.parents()));
 			}
 		});
 		ClientPlayNetworking.registerGlobalReceiver(Payloads.OpenBabyDesigner.TYPE, (p, ctx) -> Minecraft.getInstance().setScreenAndShow(
 				new dev.lifestages.client.screen.BabyDesignScreen(p.entityId(), p.name(), p.look())));
+		ClientPlayNetworking.registerGlobalReceiver(Payloads.OpenCostumes.TYPE, (p, ctx) -> ClientLife.costumePending = true);
+		ClientPlayNetworking.registerGlobalReceiver(Payloads.HolidayInfo.TYPE, (p, ctx) -> {
+			ClientLife.holiday = p.holiday();
+			ClientLife.holidayLine = p.line();
+		});
 		ClientPlayNetworking.registerGlobalReceiver(Payloads.CryArrow.TYPE, (p, ctx) -> {
 			ClientLife.cryingEntityId = p.entityId();
 			ClientLife.cryingUntil = ctx.client().level == null ? 0 : ctx.client().level.getGameTime() + 100;

@@ -98,6 +98,10 @@ cp build/libs/lifestages-0.1.0.jar "$USERPROFILE/curseforge/minecraft/Instances/
 - **Rendering:** Moms and NPC babies use `HumanoidRenderState` (an avatar render state gets redrawn by the player renderer). Model parts are reset every frame by `Model.setupAnim → resetPose`.
 - **Mob AI:** `TemptGoal` needs `Attributes.TEMPT_RANGE` on the mob. `Mob.targetSelector` is reached through `MobAccessor`.
 - **Mom in water:** bobbing at the surface makes `isInWater()` flicker, so "in the water" logic waits for `onGround()`.
+- **Pet players are drawn as a stand-in vanilla `Cat`** (`client/render/PetCats`), never added to the world. `LevelExtractorMixin` swaps the player's render state for the cat's in the world entity pass (`extractVisibleEntities`; the local player's own first-person state must stay an `AvatarRenderState`), so the cat model, walk cycle, collar, name tag and the lead rope (via `Leashable.setLeashedTo` on the stand-in, client side only) all come from vanilla. `CatAccessor` sets the variant and collar; `WalkAnimationAccessor` copies the walk cycle.
+- **Server-pushed player movement:** set `needsSync = true` after `setDeltaMovement` on a `ServerPlayer` (there is no `hurtMarked` in 26.3).
+- **Saved data:** `SavedDataType(id, ctor, codec, null)`; Fabric accepts a null `DataFixTypes`. Blocks no longer need a `MapCodec`/`codec()` override. Recipe categories are `misc`, `building`, `equipment`, `redstone` (`food` fails to load). `Entity.setPermanentlyInvulnerable` replaces `setInvulnerable`.
+- **Pet stages compare as strangers:** `Stage.atMost`/`atLeast` return false between a pet stage and a person's, so `canCarry`, `canParent`, "grown up" and child counts all exclude cats without extra checks. `isFinal()` is Elderly or Old Cat; `isPet()` is Kitten, Cat or Old Cat.
 - **Changes from earlier rounds:**
   - Mom-built houses have a blueprint version (`HouseBuilder.VERSION`, now 3); older houses get remodeled.
   - Stage lengths are `Stage.minMinutes`, now the original values: a full life is about 2 hours with goals done.
@@ -105,7 +109,7 @@ cp build/libs/lifestages-0.1.0.jar "$USERPROFILE/curseforge/minecraft/Instances/
 ## Code map (`src/main/java/dev/lifestages`)
 
 - **`life/`:** the core systems.
-  - `Stage` (the 11 stages) and `LifeData` (per-player synced attachment; codecs grouped at 16 fields or fewer). `Life` handles access.
+  - `Stage` (the 11 human stages, then Kitten, Cat and Old Cat) and `LifeData` (per-player synced attachment; codecs grouped at 16 fields or fewer). `Life` handles access.
   - `LifeManager` (the server tick: aging, naps, old age).
   - `Choices` (Adult/Baby/Elderly/Ghost, Mom pick, `lookingForBaby` defaults to on). A baby connection places a `StarterChest` (up to 4).
   - `Feeding` (only newborns are milk-only).
@@ -114,21 +118,37 @@ cp build/libs/lifestages-0.1.0.jar "$USERPROFILE/curseforge/minecraft/Instances/
   - `Moms` (assign, spawn, house planning that avoids other players' houses).
   - `HouseBuilder` (the 13x7 cottage blueprint with a nursery; site choice keeps 4+ blocks from other houses).
   - `DropFixer` (fills or fences drops near the house).
+  - `Pets` (pet cats: dash, night vision, the lead, feeding milk/fish, meow/hiss/purr, chat as meows, cat sounds).
+  - `Holidays` (world `SavedData` calendar; Easter eggs, Halloween costumes and trick-or-treaters, Christmas tree and named presents; `end` clears everything).
 - **`entity/`:**
-  - `MomEntity`: the NPC Mom AI. Order inside `customServerAiStep`: self-safety → teen check → parent near → threats → cry → changing table → nap → feeding and diapers → nap start → tidy → fix drops → playtime → carry/home.
+  - `MomEntity`: the NPC Mom AI. Order inside `customServerAiStep`: self-safety → pet care (`petCare`, cats only) → teen check → parent near → threats → cry → changing table → nap → feeding and diapers → nap start → tidy → fix drops → playtime → carry/home.
   - `BabyEntity`: NPC child from egg to Young Adult; needs, care-based growth, sugar rush, rescue instead of death.
   - `ThrownDiaper`.
-- **`block/`:** crib, changing table, music box (Twinkle Twinkle), trash can, presents (4-slot containers, `BabySafe`), teddy bear (`BabySafe`), Will Chest, gravestone, mess. `Nursery` is the per-dimension registry of tables, trash cans and playing music boxes.
+- **`block/`:** Easter egg (6 designs, gives a sweet when mined), Christmas tree (two halves), crib, changing table, music box (Twinkle Twinkle), trash can, presents (4-slot containers, `BabySafe`), teddy bear (`BabySafe`), Will Chest, gravestone, mess. `Nursery` is the per-dimension registry of tables, trash cans and playing music boxes.
 - **`registry/`:** `Mod*` classes for items, blocks, entities, menus, sounds, particles, effects, components, advancements and damage.
 - **`net/`:** `Payloads` (`Choose` has `momLook`; `Act` actions include `SEARCH_PARENTS`) and `Net`.
 - **Client (`src/client/java/dev/lifestages/client`):**
   - `Hud`: stage, growth bar, naps and sugar at top center; the NPC baby panel at top left; care tips under the crosshair.
   - `Keys`.
-  - Screens: choice (with "Search for parents"), Mom picker, emote wheel, journal, present.
-  - Renderers: Mom, NPC baby, player overlay (including the carrier).
+  - Screens: choice (with "Search for parents" and Pet Cat), Mom picker, cat picker (real cats via `InventoryScreen.extractEntityInInventoryFollowsMouse`), costume picker, emote wheel (cat sounds for pets), journal, present.
+  - Renderers: Mom, NPC baby, player overlay (carrier and Halloween costume), `PetCats` (pet players as cats).
   - `PlayerModelMixin`: baby proportions.
 
-## State of the last round (round 18)
+## State of the last round (round 19)
+
+| Change | Status |
+|---|---|
+| Pet Cat choice (first join and every later life): pick one of 11 cats and a family (or an NPC Mom takes you in). Kitten (15 min) → Cat (45 min) → Old Cat (lifespan like an Elder's) | Done, tested (picker, Siamese kitten, drawn as a cat) |
+| Fed by others only: milk bottles as a Kitten, any fish as a Cat; can't eat by themselves or help themselves to cake; Mom feeds a cat in her care | Done, tested (Mom feeding not covered) |
+| Jump x2 height (+41% jump strength), 2.5 s sprint dash with a refill meter, no fall damage, night vision from dusk to dawn | Done; jump, fall and night vision tested, dash not covered |
+| Starts with a lead; family (owners, their parents and children) clip it on and walk the cat; the lead pulls once taut and comes off if the walker leaves | Done; clip and auto-unclip tested with a FakePlayer, pulling and the rope drawing need two real players |
+| Meow (calls family with the cry arrow), hiss (pushes monsters, calms creepers), purr (heals nearby); chat as meows; cat hurt and death sounds | Done, meowify tested |
+| Holidays every 3-5 days at sunrise, cleared the next sunrise; `/lifestages holiday [start|end]`; config `holidaysEnabled`, `holidayMinDays`, `holidayMaxDays` | Done, tested via the commands |
+| Easter: 5 eggs per player (10 solo) near home; mined eggs give a cookie, cake or Chocolate Bunny; Chocolate Bunny recipe (cocoa, sugar, milk) | Done, tested |
+| Halloween: costume picker (Pumpkin, Skeleton, Ghost, Vampire) drawn over the skin; 10-15 masked trick-or-treaters near home; treat or harmless trick, once per villager | Done, tested |
+| Christmas: tree in the cottage (outside if no room) and a named present per player with a valuable gift | Done, tested |
+
+## State of the previous round (round 18)
 
 | Change | Status |
 |---|---|
@@ -192,3 +212,5 @@ cp build/libs/lifestages-0.1.0.jar "$USERPROFILE/curseforge/minecraft/Instances/
 - The carrier texture is a jacket-layer overlay. A 3D carrier model would look better.
 - CurseForge publishing waits until the user approves the finished mod. License is still `All-Rights-Reserved` pending their choice.
 - A dedicated server setup guide (beyond the README) was offered but not written.
+- A pet cat sees its own human arms in first person; other players only ever see the cat. Pets can still mine and use tools.
+- Holiday decorations only go in the Overworld; unopened Christmas presents stay after the day (on purpose).

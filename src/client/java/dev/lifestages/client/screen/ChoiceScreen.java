@@ -33,8 +33,9 @@ public class ChoiceScreen extends Screen {
 		cards.add(new Card(2, "2  Baby", "Newborn", new String[]{"Tiny, carried and fed.", "Grow up with a parent", "or an NPC Mom."}, 0xFFF2A2BE));
 		if (mode == 2) {
 			cards.add(new Card(3, "3  Elderly", "Elder, age 65", new String[]{"About 30 minutes left.", "Starts with 5 XP levels", "and a Walking Cane."}, 0xFFC9B8E8));
-			cards.add(new Card(4, "4  Ghost", ghostLocked ? "Not twice in a row" : "Up to 10 minutes", new String[]{"Float through walls.", "Boo! Flicker lamps.", "Then choose 1, 2 or 3."}, 0xFFB9D7C8));
+			cards.add(new Card(4, "4  Ghost", ghostLocked ? "Not twice in a row" : "Up to 10 minutes", new String[]{"Float through walls.", "Boo! Flicker lamps.", "Then choose 1, 2, 3 or 5."}, 0xFFB9D7C8));
 		}
+		cards.add(new Card(5, (mode == 2 ? "5" : "3") + "  Pet Cat", "Kitten", new String[]{"The family's cat.", "Fed milk, then fish.", "Leap, dash, and see", "in the dark."}, 0xFFE8C07A));
 	}
 
 	@Override
@@ -92,11 +93,15 @@ public class ChoiceScreen extends Screen {
 	}
 
 	private Component parentLabel() {
-		return Component.literal("Baby's parent: " + (parentIndex < 0 ? "Anyone (or NPC Mom)" : parents.get(parentIndex).name()));
+		return Component.literal("Family for a baby or cat: " + (parentIndex < 0 ? "Anyone (or NPC Mom)" : parents.get(parentIndex).name()));
 	}
 
 	private void choose(int option) {
-		Optional<java.util.UUID> parent = option == 2 && parentIndex >= 0 ? Optional.of(parents.get(parentIndex).id()) : Optional.empty();
+		Optional<java.util.UUID> parent = (option == 2 || option == 5) && parentIndex >= 0 ? Optional.of(parents.get(parentIndex).id()) : Optional.empty();
+		if (option == 5) {
+			minecraft.setScreenAndShow(new PetPickerScreen(parent)); // a cat picks what kind of cat they are
+			return;
+		}
 		if (option == 2 && parent.isEmpty()) {
 			minecraft.setScreenAndShow(new MomPickerScreen(parent)); // a Baby with no chosen parent picks their Mom
 			return;

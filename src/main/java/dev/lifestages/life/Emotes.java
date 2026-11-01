@@ -75,6 +75,10 @@ public final class Emotes {
 			return;
 		}
 		cd[kind.ordinal()] = now + kind.cooldownSeconds * 20L;
+		if (s.isPet()) {
+			Pets.emote(player, kind);
+			return;
+		}
 		switch (kind) {
 			case CRY -> cry(player);
 			case FART -> fart(player, false);

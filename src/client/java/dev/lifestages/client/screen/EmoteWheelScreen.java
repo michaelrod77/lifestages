@@ -22,6 +22,10 @@ import net.minecraft.resources.Identifier;
  */
 public class EmoteWheelScreen extends Screen {
 	private static final String[] NAMES = {"Cry", "Fart", "Be cute", "Poop"};
+	private static final String[] CAT_NAMES = {"Meow", "Hiss", "Purr", ""};
+	private static final Identifier[] CAT_ICONS = {
+			LifeStages.id("textures/gui/emote/meow.png"), LifeStages.id("textures/gui/emote/hiss.png"),
+			LifeStages.id("textures/gui/emote/purr.png"), LifeStages.id("textures/gui/emote/purr.png")};
 	private static final Identifier[] ICONS = {
 			LifeStages.id("textures/gui/emote/cry.png"), LifeStages.id("textures/gui/emote/fart.png"),
 			LifeStages.id("textures/gui/emote/cute.png"), LifeStages.id("textures/gui/emote/poop.png")};
@@ -46,6 +50,14 @@ public class EmoteWheelScreen extends Screen {
 	private boolean available(int i) {
 		Stage s = minecraft.player == null ? Stage.ADULT : Life.stage(minecraft.player);
 		return i != 3 || s.wearsDiaper();
+	}
+
+	private boolean cat() {
+		return minecraft.player != null && Life.stage(minecraft.player).isPet();
+	}
+
+	private String name(int i) {
+		return cat() ? CAT_NAMES[i] : NAMES[i];
 	}
 
 	private long now() {
@@ -78,13 +90,16 @@ public class EmoteWheelScreen extends Screen {
 			if (i == hovered) {
 				g.fill(x - 4, y - 4, x + 36, y + 36, 0x60FFFFFF);
 			}
-			g.blit(RenderPipelines.GUI_TEXTURED, ICONS[i], x, y, 0, 0, 32, 32, 32, 32, on ? 0xFFFFFFFF : 0x60FFFFFF);
-			g.centeredText(font, NAMES[i], x + 16, y + 36, on ? 0xFFFFFFFF : 0xFF808080);
+			if (!available(i) && cat()) {
+				continue; // cats have three sounds, not four
+			}
+			g.blit(RenderPipelines.GUI_TEXTURED, (cat() ? CAT_ICONS : ICONS)[i], x, y, 0, 0, 32, 32, 32, 32, on ? 0xFFFFFFFF : 0x60FFFFFF);
+			g.centeredText(font, name(i), x + 16, y + 36, on ? 0xFFFFFFFF : 0xFF808080);
 			if (available(i) && wait > 0) {
 				g.centeredText(font, wait + "s", x + 16, y + 12, 0xFFFFD060);
 			}
 		}
-		g.centeredText(font, available(last) ? "Again: " + NAMES[last] : "Release to emote", cx, cy - 4, 0xFFC0C0C0);
+		g.centeredText(font, available(last) ? "Again: " + name(last) : "Release to emote", cx, cy - 4, 0xFFC0C0C0);
 	}
 
 	private void fire(int choice) {

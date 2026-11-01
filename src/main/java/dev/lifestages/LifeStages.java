@@ -71,6 +71,7 @@ public class LifeStages implements ModInitializer {
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPED.register(server -> resetState());
 		// Monsters go after NPC babies too: keeping them safe is the parent's job.
 		net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
+			dev.lifestages.life.Holidays.onEntityLoad(entity, level);
 			if (entity instanceof net.minecraft.world.entity.monster.Monster monster && !(entity instanceof net.minecraft.world.entity.NeutralMob)) {
 				((dev.lifestages.mixin.MobAccessor) monster).lifestages$targetSelector().addGoal(3,
 						new net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal<>(monster, dev.lifestages.entity.BabyEntity.class, true));
@@ -81,13 +82,18 @@ public class LifeStages implements ModInitializer {
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			LifeManager.tick(server);
 			Moms.tick(server);
+			dev.lifestages.life.Holidays.tick(server);
 			for (ServerPlayer p : server.getPlayerList().getPlayers()) {
 				Carrying.tick(p);
 			}
 		});
 
-		ServerPlayerEvents.JOIN.register(Net::syncConfig);
+		ServerPlayerEvents.JOIN.register(player -> {
+			Net.syncConfig(player);
+			dev.lifestages.life.Holidays.onJoin(player);
+		});
 		ServerPlayerEvents.LEAVE.register(player -> {
+			dev.lifestages.life.Pets.unclip(player, Life.of(player), false);
 			Carrying.drop(player);
 			Moms.onLeave(player);
 		});
@@ -95,6 +101,7 @@ public class LifeStages implements ModInitializer {
 		ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
 			if (entity instanceof ServerPlayer player) {
 				LifeData d = Life.of(player);
+				dev.lifestages.life.Pets.unclip(player, d, false);
 				if (d.started && !d.isGhost()) {
 					d.pendingChoice = 2;
 					Life.save(player, d);
@@ -113,13 +120,20 @@ public class LifeStages implements ModInitializer {
 
 		ItemEvents.USE.register(Feeding::onUse);
 		UseEntityCallback.EVENT.register((player, level, hand, entity, hit) -> {
-			InteractionResult r = Carrying.onUseEntity(player, level, hand, entity);
+			InteractionResult r = dev.lifestages.life.Pets.onUseEntity(player, level, hand, entity);
+			if (r != InteractionResult.PASS) {
+				return r;
+			}
+			r = Carrying.onUseEntity(player, level, hand, entity);
 			if (r != InteractionResult.PASS) {
 				return r;
 			}
 			r = Feeding.onUseEntity(player, level, hand, entity);
 			if (r != InteractionResult.PASS) {
 				return r;
+			}
+			if (entity instanceof Villager v && v.entityTags().contains(dev.lifestages.life.Holidays.TRICK_OR_TREATER) && hand == net.minecraft.world.InteractionHand.MAIN_HAND) {
+				return player instanceof ServerPlayer sp ? dev.lifestages.life.Holidays.trickOrTreat(sp, v) : InteractionResult.SUCCESS;
 			}
 			if (entity instanceof Villager && player.hasEffect(ModEffects.STINKY)) {
 				if (player instanceof ServerPlayer sp) {
@@ -175,6 +189,9 @@ public class LifeStages implements ModInitializer {
 				return InteractionResult.FAIL; // a baby in a carrier can't reach anything
 			}
 			var state = level.getBlockState(hit.getBlockPos());
+			if (state.getBlock() instanceof CakeBlock && dev.lifestages.life.Pets.isPet(player)) {
+				return InteractionResult.FAIL; // the cat doesn't get to help itself to the cake
+			}
 			if (state.getBlock() instanceof CakeBlock && player.getFoodData().needsFood() && player instanceof ServerPlayer sp
 					&& player.getItemInHand(hand).isEmpty()) {
 				Feeding.ateCake(sp);
@@ -220,6 +237,9 @@ public class LifeStages implements ModInitializer {
 			if (Carrying.isCarried(player) && (source.is(DamageTypes.IN_WALL) || source.is(DamageTypes.CRAMMING))) {
 				return false; // held in someone's arms: never squeezed into a wall
 			}
+			if (s.isPet() && source.is(DamageTypeTags.IS_FALL)) {
+				return false; // cats always land on their feet
+			}
 			if (s.atMost(Stage.TODDLER) && source.is(DamageTypes.DROWN)) {
 				return false; // babies float on their back instead of drowning
 			}
@@ -240,6 +260,7 @@ public class LifeStages implements ModInitializer {
 		dev.lifestages.life.Ghosts.reset();
 		Moms.reset();
 		dev.lifestages.block.Nursery.reset();
+		dev.lifestages.life.Holidays.reset();
 	}
 
 	/** Newborns and infants only babble; toddlers manage three words. */
@@ -250,6 +271,11 @@ public class LifeStages implements ModInitializer {
 		}
 		Stage s = d.stage();
 		String name = sender.getName().getString();
+		if (s.isPet() && !d.isGhost()) {
+			sender.level().getServer().getPlayerList().broadcastSystemMessage(
+					Component.literal("<" + name + "> " + dev.lifestages.life.Pets.meowify(s, text, sender.getRandom())), false);
+			return false;
+		}
 		if (s.isBaby()) {
 			sender.level().getServer().getPlayerList().broadcastSystemMessage(
 					Component.literal("<" + name + "> *babbles*").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC), false);

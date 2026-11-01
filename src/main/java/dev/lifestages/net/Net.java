@@ -32,6 +32,11 @@ public final class Net {
 		PayloadTypeRegistry.serverboundPlay().register(Payloads.Choose.TYPE, Payloads.Choose.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Payloads.Emote.TYPE, Payloads.Emote.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(Act.TYPE, Act.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(Payloads.OpenCostumes.TYPE, Payloads.OpenCostumes.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(Payloads.PickCostume.TYPE, Payloads.PickCostume.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(Payloads.HolidayInfo.TYPE, Payloads.HolidayInfo.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(Payloads.PickCostume.TYPE, (p, ctx) ->
+				dev.lifestages.life.Holidays.chooseCostume(ctx.player(), p.costume()));
 
 		ServerPlayNetworking.registerGlobalReceiver(Payloads.Choose.TYPE, (p, ctx) ->
 				Choices.choose(ctx.player(), p.option(), p.parent().orElse(null), p.momLook()));
@@ -108,6 +113,14 @@ public final class Net {
 
 	public static void openBabyDesigner(ServerPlayer parent, dev.lifestages.entity.BabyEntity baby) {
 		ServerPlayNetworking.send(parent, new Payloads.OpenBabyDesigner(baby.getId(), baby.getName().getString(), baby.look()));
+	}
+
+	public static void openCostumes(ServerPlayer player) {
+		ServerPlayNetworking.send(player, new Payloads.OpenCostumes(dev.lifestages.life.Holidays.COSTUMES.length - 1));
+	}
+
+	public static void holidayInfo(ServerPlayer player, int holiday, String line) {
+		ServerPlayNetworking.send(player, new Payloads.HolidayInfo(holiday, line));
 	}
 
 	public static void cryArrow(ServerPlayer parent, net.minecraft.world.entity.Entity baby) {

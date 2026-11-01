@@ -64,7 +64,7 @@ public final class Moms {
 			if (!d.started || d.isGhost() || d.pendingChoice != 0 || p.isSpectator()) {
 				continue;
 			}
-			if (!d.momAssigned && !d.momDead && cfg.npcMomEnabled && d.stage().atMost(Stage.PRESCHOOLER)) {
+			if (!d.momAssigned && !d.momDead && cfg.npcMomEnabled && (d.stage().atMost(Stage.PRESCHOOLER) || d.stage().isPet())) {
 				if (Family.caregivers(p).isEmpty()) {
 					int waited = WAITING.merge(p.getUUID(), 1, Integer::sum);
 					if (waited >= cfg.npcMomArrivalSeconds) {
@@ -100,7 +100,8 @@ public final class Moms {
 		if (mom != null && carryable(baby)) {
 			Carrying.pickUp(mom, baby);
 		}
-		baby.sendSystemMessage(Component.literal("Mom is here to look after you. She'll feed you bottles, change you, and rock you to sleep.").withStyle(ChatFormatting.LIGHT_PURPLE));
+		baby.sendSystemMessage(Component.literal(d.stage().isPet() ? "Mom is here to look after you. She'll bring you milk, and fish when you're bigger."
+				: "Mom is here to look after you. She'll feed you bottles, change you, and rock you to sleep.").withStyle(ChatFormatting.LIGHT_PURPLE));
 		ModAdvancements.award(baby, "it_takes_a_village");
 	}
 

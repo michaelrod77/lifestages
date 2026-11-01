@@ -60,7 +60,7 @@ public class PlayerOverlayLayer extends RenderLayer<AvatarRenderState, PlayerMod
 	@Override
 	public void submit(PoseStack pose, SubmitNodeCollector collector, int light, AvatarRenderState state, float yRot, float xRot) {
 		if (carrying(state)) {
-			coloredCutoutModelCopyLayerRender(getParentModel(), CARRIER, pose, collector, light, state, -1, 3);
+			coloredCutoutModelCopyLayerRender(getParentModel(), CARRIER, pose, collector, light, state, -1, 4);
 		}
 		LifeData d = lifeOf(state);
 		if (d == null) {
@@ -68,6 +68,11 @@ public class PlayerOverlayLayer extends RenderLayer<AvatarRenderState, PlayerMod
 		}
 		Stage s = d.stage();
 		boolean slim = state.skin != null && state.skin.model() == PlayerModelType.SLIM;
+		if (d.costume > 0 && d.costume < dev.lifestages.life.Holidays.COSTUMES.length) {
+			// Halloween: the costume goes over everything else they're wearing
+			String name = dev.lifestages.life.Holidays.COSTUMES[d.costume].toLowerCase(java.util.Locale.ROOT);
+			coloredCutoutModelCopyLayerRender(getParentModel(), tex("costume_" + name + (slim ? "_slim" : "")), pose, collector, light, state, -1, 3);
+		}
 		int order = 1;
 		if (s == Stage.NEWBORN) {
 			coloredCutoutModelCopyLayerRender(getParentModel(), slim ? SWADDLE_SLIM : SWADDLE, pose, collector, light, state, -1, order);

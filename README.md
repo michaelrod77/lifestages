@@ -30,17 +30,39 @@ Every player needs the mod; the server refuses players without it.
 
 | Key | Action |
 | --- | --- |
-| Z (hold) | Emote wheel: cry, fart, be cute, poop (Newborn to Preschooler). Release in the middle to repeat the last emote, so tapping Z cries again. |
+| Z (hold) | Emote wheel: cry, fart, be cute, poop (Newborn to Preschooler); meow, hiss, purr (pet cats). Release in the middle to repeat the last emote, so tapping Z cries again. |
 | J | Growth Journal: stage, age, goals, family, settings |
 | U | Ask the player you're looking at to be family |
 | Right-click (empty hand) | Pick up your own baby or child, or a child who turned on "Looking for new parent" (that pickup makes you their parent). Sneak + right-click picks up any other child. Two newborns or infants fit at once, older children one at a time. Your hands stay free; the baby can't reach anything. Right-click a changing table while carrying them to put them on it, or a crib to lay an NPC baby down. |
 | V | Put down the baby in your carrier (or, as a toddler, ask to get down) |
 | Jump x6 | Wriggle free when carried (Toddler and older) |
 | B / K / R | Ghost: Boo, flicker a lamp, be reborn |
+| Right-click a pet cat holding a lead | Take them for a walk (right-click again to unclip). A cat can also right-click someone in its family while holding its own lead. |
+| Sneak (pet cat) | Sit; stay still to curl up for a nap |
 
 ## Starting a life
 
-On first join you choose Adult (you start as a Young Adult, age 18, with a bed, listed as looking for a baby so new babies can pick you as their parent) or Baby. Each time a baby connects with you, a starter chest appears beside you with a crib, 32 diapers, a rattle, 64 milk bottles, a trash can and a music box. You can look after up to 4 babies, so you get up to 4 of those chests. A Baby can pick a parent from the grown-ups looking for a baby ("Search for parents" checks again if nobody is listed yet), and picks which of the six Moms will look after them, or "Surprise me". Each player's Mom builds her house clear of everyone else's. A child who already has a Mom can open the Journal (J) and turn on "Looking for new parent". The next teenager or grown-up who picks them up becomes their parent, and Mom steps back while that parent is nearby. Anyone old enough can always pick a child up.
+On first join you choose Adult, Baby or Pet Cat (see below). As an Adult you start as a Young Adult, age 18, with a bed, listed as looking for a baby so new babies (and cats) can pick you as their parent. Each time a baby connects with you, a starter chest appears beside you with a crib, 32 diapers, a rattle, 64 milk bottles, a trash can and a music box. You can look after up to 4 babies, so you get up to 4 of those chests. A Baby can pick a parent from the grown-ups looking for a baby ("Search for parents" checks again if nobody is listed yet), and picks which of the six Moms will look after them, or "Surprise me". Each player's Mom builds her house clear of everyone else's. A child who already has a Mom can open the Journal (J) and turn on "Looking for new parent". The next teenager or grown-up who picks them up becomes their parent, and Mom steps back while that parent is nearby. Anyone old enough can always pick a child up.
+
+## Pet cats
+
+Choose Pet Cat (on first join or any later life) to be the family's cat. Pick one of eleven cats, and which grown-up's family you join (or nobody, and an NPC Mom takes you in). Other players see you as that cat, with a red collar.
+
+- You grow from Kitten (about 15 minutes) to Cat (about 45 minutes) to Old Cat, whose time runs out like an Elder's.
+- Cats can't feed themselves. Anyone can feed you: milk bottles while you're a Kitten, any fish once you're a Cat. Meow (Z) and an arrow points your family to you.
+- You jump twice as high as a person, sprint in short fast bursts (the Dash meter shows it refilling), never take fall damage, and see in the dark at night.
+- You start with a lead. Anyone in your family (your owners, and their parents and children) can clip it on and walk you; it pulls you along once it's taut.
+- Hiss sends monsters back and stops creepers; purring heals people nearby. Your chat comes out as meows.
+
+## Holidays
+
+Every 3 to 5 days, one of three holidays starts at sunrise (or when everyone wakes up) and lasts until the next sunrise. The evening before, everyone hears what tomorrow is. Everything the holiday brought is gone the next morning, apart from unopened presents.
+
+- **Easter:** pastel eggs are hidden around home, 5 per player (10 if you're playing alone). Mine one and a cookie, a cake or a Chocolate Bunny lands in your inventory. The top of the screen shows how many you've found and how many are still hidden. Chocolate Bunny recipe: cocoa beans, sugar and milk (a bucket or a milk bottle), for two.
+- **Halloween:** pick a costume (Pumpkin, Skeleton, Ghost or Vampire) to wear over your skin for the day. 10 to 15 trick-or-treaters, mostly kids in masks, gather near home. Right-click one for a treat, or a short, harmless trick (slowness, dizziness, darkness, glowing, weak arms).
+- **Christmas:** a Christmas tree appears in the house (outside if there's no room), with a present for each player underneath: diamonds, emeralds, a block of gold or iron, and once in a while a block of diamond. Each present has a name on it; only that player can open it.
+
+Home is the family cottage the NPC Mom built, or your bed if it's close, or wherever you are. Holidays only decorate the Overworld. `/lifestages holiday` says when the next one is. Turn them off, or change how often they come, with `holidaysEnabled`, `holidayMinDays` and `holidayMaxDays` in the config.
 
 ## Raising an NPC baby
 
@@ -68,7 +90,8 @@ Recipes: Changing Table (3 white wool over planks-chest-planks over 3 planks), M
 
 - `/family invite|accept|decline|leave <player>|list`
 - `/lifestages info [player]`
-- Operators: `/lifestages stage <player> <stage>`, `/lifestages age <player> add <minutes>`, `/lifestages goals <player> complete`, `/lifestages mom summon|dismiss <player>`, `/lifestages reload`
+- `/lifestages holiday`: today's holiday and when the next one is
+- Operators: `/lifestages stage <player> <stage>`, `/lifestages age <player> add <minutes>`, `/lifestages goals <player> complete`, `/lifestages mom summon|dismiss <player>`, `/lifestages holiday start easter|halloween|christmas`, `/lifestages holiday end`, `/lifestages reload`
 
 ## Building
 

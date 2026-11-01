@@ -7,6 +7,7 @@ import dev.lifestages.entity.MomEntity;
 import dev.lifestages.life.HouseBuilder;
 import dev.lifestages.life.Life;
 import dev.lifestages.registry.ModBlocks;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import dev.lifestages.life.LifeData;
 import dev.lifestages.life.Stage;
@@ -1090,7 +1091,204 @@ public class LifeStagesClientTest implements FabricClientGameTest {
 				return second != null && (Math.abs(second.getX() - first.getX()) > HouseBuilder.W + 4
 						|| Math.abs(second.getZ() - first.getZ()) > HouseBuilder.D + 7);
 			}), "a second house was planned on top of the first");
+
+			// 17. Holidays: Easter eggs, then Halloween (costume picker, trick-or-treaters), then Christmas (tree and a present).
+			server.runCommand("lifestages holiday start easter");
+			ctx.waitTicks(20);
+			var eggs = server.computeOnServer(s -> {
+				var p = s.getPlayerList().getPlayers().get(0);
+				return holidayBlocks((ServerLevel) p.level(), dev.lifestages.life.Holidays.homeOf(p), dev.lifestages.registry.ModBlocks.EASTER_EGG);
+			});
+			check(eggs.size() == 10, "Easter should hide 10 eggs for a solo player, found " + eggs.size());
+			var egg = eggs.get(0);
+			server.runCommand("tp @a " + (egg.getX() + 3) + " " + egg.getY() + " " + egg.getZ() + " facing " + egg.getX() + " " + egg.getY() + " " + egg.getZ());
+			ctx.runOnClient(mc -> mc.options.setCameraType(CameraType.FIRST_PERSON));
+			ctx.waitTicks(30);
+			ctx.takeScreenshot("17_easter_egg");
+			check(server.computeOnServer(s -> {
+				var p = s.getPlayerList().getPlayers().get(0);
+				int sweetsBefore = sweets(p);
+				p.gameMode.destroyBlock(egg);
+				return sweets(p) > sweetsBefore && p.level().getBlockState(egg).isAir();
+			}), "mining an Easter egg did not give a sweet");
+			ctx.waitTicks(60);
+			ctx.takeScreenshot("17b_easter_hud");
+
+			server.runCommand("lifestages holiday start halloween");
+			ctx.waitForScreen(dev.lifestages.client.screen.CostumeScreen.class);
+			ctx.waitTicks(5);
+			ctx.takeScreenshot("17c_costume_picker");
+			ctx.runOnClient(mc -> ((dev.lifestages.client.screen.CostumeScreen) mc.gui.screen()).pick(2));
+			ctx.waitTicks(20);
+			check(server.computeOnServer(s -> {
+				var p = s.getPlayerList().getPlayers().get(0);
+				return holidayBlocks((ServerLevel) p.level(), dev.lifestages.life.Holidays.homeOf(p), dev.lifestages.registry.ModBlocks.EASTER_EGG).isEmpty();
+			}), "Easter eggs were not cleared away when Easter ended");
+			check(server.computeOnServer(s -> Life.of(s.getPlayerList().getPlayers().get(0)).costume) == 2, "the Skeleton costume was not put on");
+			check(ctx.computeOnClient(mc -> Life.of(mc.player).costume) == 2, "the costume did not sync to the client");
+			int kids = server.computeOnServer(s -> trickOrTreaters(s).size());
+			check(kids >= 10 && kids <= 15, "Halloween should bring 10-15 trick-or-treaters, found " + kids);
+			check(server.computeOnServer(s -> {
+				var p = s.getPlayerList().getPlayers().get(0);
+				var v = trickOrTreaters(s).get(0);
+				int sweetsBefore = sweets(p);
+				int effects = p.getActiveEffects().size();
+				var r = dev.lifestages.life.Holidays.trickOrTreat(p, v);
+				boolean got = sweets(p) > sweetsBefore || p.getInventory().countItem(net.minecraft.world.item.Items.PUMPKIN_PIE) > 0
+						|| p.getInventory().countItem(net.minecraft.world.item.Items.HONEY_BOTTLE) > 0 || p.getActiveEffects().size() > effects;
+				p.teleportTo(v.getX() + 2.5, v.getY(), v.getZ() + 2.5);
+				return r == net.minecraft.world.InteractionResult.SUCCESS && got;
+			}), "a trick-or-treater gave neither a treat nor a trick");
+			server.runOnServer(s -> s.getPlayerList().getPlayers().get(0).removeAllEffects()); // a trick may have put the lights out
+			ctx.runOnClient(mc -> mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
+			ctx.waitTicks(220); // let the chat fade
+			ctx.takeScreenshot("17d_halloween_costume");
+
+			server.runCommand("lifestages holiday start christmas");
+			ctx.waitTicks(20);
+			check(server.computeOnServer(s -> trickOrTreaters(s).isEmpty()), "trick-or-treaters stayed after Halloween");
+			check(server.computeOnServer(s -> Life.of(s.getPlayerList().getPlayers().get(0)).costume) == 0, "the costume stayed on after Halloween");
+			var tree = server.computeOnServer(s -> {
+				var p = s.getPlayerList().getPlayers().get(0);
+				var trees = holidayBlocks((ServerLevel) p.level(), dev.lifestages.life.Holidays.homeOf(p), dev.lifestages.registry.ModBlocks.CHRISTMAS_TREE);
+				return trees.isEmpty() ? null : trees.get(0);
+			});
+			check(tree != null, "no Christmas tree appeared near home");
+			check(server.computeOnServer(s -> {
+				var p = s.getPlayerList().getPlayers().get(0);
+				for (var pos : BlockPos.betweenClosed(tree.offset(-3, -2, -3), tree.offset(3, 2, 3))) {
+					if (p.level().getBlockEntity(pos) instanceof dev.lifestages.block.PresentBlockEntity present && present.ownerFor(p) == null
+							&& !present.getItem(0).isEmpty()) {
+						return true;
+					}
+				}
+				return false;
+			}), "no present with a gift was put under the tree");
+			server.runCommand("tp @a " + (tree.getX() + 3) + " " + tree.getY() + " " + (tree.getZ() + 1) + " facing " + tree.getX() + " " + (tree.getY() + 1) + " " + tree.getZ());
+			ctx.runOnClient(mc -> mc.options.setCameraType(CameraType.FIRST_PERSON));
+			ctx.waitTicks(220); // let the chat fade
+			ctx.takeScreenshot("17e_christmas_tree");
+			server.runCommand("lifestages holiday end");
+			ctx.waitTicks(5);
+			check(server.computeOnServer(s -> s.getPlayerList().getPlayers().get(0).level().getBlockState(tree).isAir()), "the Christmas tree stayed after Christmas");
+
+			// 18. Pet cat: the choice screen offers it, the picker shows real cats, and the kitten gets cat rules.
+			server.runOnServer(s -> {
+				var p = s.getPlayerList().getPlayers().get(0);
+				var d = Life.of(p);
+				d.pendingChoice = 2;
+				Life.save(p, d);
+			});
+			ctx.waitForScreen(ChoiceScreen.class);
+			ctx.takeScreenshot("18_choice_with_pet");
+			ctx.runOnClient(mc -> mc.setScreenAndShow(new dev.lifestages.client.screen.PetPickerScreen(Optional.empty())));
+			ctx.waitTicks(10);
+			ctx.takeScreenshot("18b_cat_picker");
+			ctx.runOnClient(mc -> ((dev.lifestages.client.screen.PetPickerScreen) mc.gui.screen()).pick(4));
+			ctx.waitTicks(40);
+			check(server.computeOnServer(s -> {
+				var p = s.getPlayerList().getPlayers().get(0);
+				var d = Life.of(p);
+				return d.stage() == Stage.KITTEN && d.petLook == 3 && p.getInventory().countItem(net.minecraft.world.item.Items.LEAD) == 1;
+			}), "choosing Pet Cat did not start a Siamese Kitten with a lead");
+			check(ctx.computeOnClient(mc -> dev.lifestages.client.render.PetCats.standIn(mc.player) != null), "the kitten is not drawn as a cat");
+			check(server.computeOnServer(s -> {
+				var p = s.getPlayerList().getPlayers().get(0);
+				var jump = p.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.JUMP_STRENGTH);
+				return jump.getValue() > jump.getBaseValue();
+			}), "a kitten should jump higher than a person");
+			check(server.computeOnServer(s -> {
+				var p = s.getPlayerList().getPlayers().get(0);
+				var level = (ServerLevel) p.level();
+				var main = net.minecraft.world.InteractionHand.MAIN_HAND;
+				var fake = net.fabricmc.fabric.api.entity.FakePlayer.get(level);
+				// cats can't feed themselves
+				p.getFoodData().setFoodLevel(6);
+				var cod = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.COD);
+				p.setItemInHand(main, cod);
+				p.gameMode.useItem(p, level, cod, main);
+				boolean selfRefused = !p.isUsingItem();
+				p.setItemInHand(main, net.minecraft.world.item.ItemStack.EMPTY);
+				// a kitten takes milk, not fish
+				boolean fishRefused = dev.lifestages.life.Pets.feed(fake, p, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.COD))
+						== net.minecraft.world.InteractionResult.FAIL;
+				int milk = Life.of(p).milk;
+				fake.setItemInHand(main, new net.minecraft.world.item.ItemStack(dev.lifestages.registry.ModItems.MILK_BOTTLE));
+				dev.lifestages.life.Pets.feed(fake, p, fake.getItemInHand(main));
+				boolean drank = Life.of(p).milk == milk + 1;
+				// a grown cat eats fish
+				dev.lifestages.life.LifeManager.setStage(p, Stage.CAT);
+				p.getFoodData().setFoodLevel(6);
+				int food = Life.of(p).food;
+				dev.lifestages.life.Pets.feed(fake, p, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.SALMON));
+				boolean ateFish = Life.of(p).food > food;
+				// always lands on their feet
+				float hp = p.getHealth();
+				p.hurtServer(level, level.damageSources().fall(), 6.0f);
+				boolean noFall = p.getHealth() == hp;
+				String meow = dev.lifestages.life.Pets.meowify(Stage.CAT, "hello there friend", p.getRandom());
+				if (!(selfRefused && fishRefused && drank && ateFish && noFall && meow.split(" ").length == 3 && !meow.contains("hello"))) {
+					System.out.println("PET RULES: self " + selfRefused + " fish " + fishRefused + " milk " + drank + " ate " + ateFish + " fall " + noFall + " meow " + meow);
+					return false;
+				}
+				return true;
+			}), "pet rules: no self-feeding, milk for a kitten, fish for a cat, no fall damage, chat as meows");
+			server.runCommand("time set midnight");
+			ctx.waitTicks(30);
+			check(server.computeOnServer(s -> s.getPlayerList().getPlayers().get(0).hasEffect(net.minecraft.world.effect.MobEffects.NIGHT_VISION)),
+					"a cat should see in the dark at night");
+			server.runCommand("time set noon");
+			ctx.waitTicks(30);
+			check(server.computeOnServer(s -> !s.getPlayerList().getPlayers().get(0).hasEffect(net.minecraft.world.effect.MobEffects.NIGHT_VISION)),
+					"a cat's night vision should end in the day");
+			check(server.computeOnServer(s -> {
+				var p = s.getPlayerList().getPlayers().get(0);
+				var level = (ServerLevel) p.level();
+				var fake = net.fabricmc.fabric.api.entity.FakePlayer.get(level);
+				fake.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.LEAD));
+				var r = dev.lifestages.life.Pets.onUseEntity(fake, level, net.minecraft.world.InteractionHand.MAIN_HAND, p);
+				return r == net.minecraft.world.InteractionResult.SUCCESS && fake.getUUID().equals(Life.of(p).leashHolder);
+			}), "someone in the family could not clip a lead on the cat");
+			ctx.waitTicks(5); // the walker isn't a real player, so the lead comes off again on the next tick
+			check(server.computeOnServer(s -> Life.of(s.getPlayerList().getPlayers().get(0)).leashHolder == null),
+					"the lead did not come off when the walker left");
+			ctx.runOnClient(mc -> mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
+			ctx.waitTicks(220); // let the chat fade
+			ctx.takeScreenshot("18c_cat");
+			server.runCommand("lifestages stage @a kitten");
+			ctx.waitTicks(20);
+			ctx.takeScreenshot("18d_kitten");
+			ctx.runOnClient(mc -> mc.options.setCameraType(CameraType.FIRST_PERSON));
 		}
+	}
+
+	/** Blocks of one kind within 16 blocks of a spot (holiday decorations; the lower half of a tree). */
+	private static java.util.List<BlockPos> holidayBlocks(ServerLevel level, BlockPos home, net.minecraft.world.level.block.Block block) {
+		java.util.List<BlockPos> out = new java.util.ArrayList<>();
+		for (BlockPos pos : BlockPos.betweenClosed(home.offset(-16, -8, -16), home.offset(16, 8, 16))) {
+			var state = level.getBlockState(pos);
+			if (state.is(block) && (!(block instanceof dev.lifestages.block.ChristmasTreeBlock)
+					|| state.getValue(dev.lifestages.block.ChristmasTreeBlock.HALF) == net.minecraft.world.level.block.state.properties.DoubleBlockHalf.LOWER)) {
+				out.add(pos.immutable());
+			}
+		}
+		return out;
+	}
+
+	private static java.util.List<net.minecraft.world.entity.npc.villager.Villager> trickOrTreaters(net.minecraft.server.MinecraftServer s) {
+		java.util.List<net.minecraft.world.entity.npc.villager.Villager> out = new java.util.ArrayList<>();
+		for (var level : s.getAllLevels()) {
+			out.addAll(level.getEntities(net.minecraft.world.entity.EntityTypes.VILLAGER,
+					v -> v.entityTags().contains(dev.lifestages.life.Holidays.TRICK_OR_TREATER)));
+		}
+		return out;
+	}
+
+	/** Cookies, Chocolate Bunnies and cakes in a player's inventory. */
+	private static int sweets(net.minecraft.server.level.ServerPlayer p) {
+		var inv = p.getInventory();
+		return inv.countItem(net.minecraft.world.item.Items.COOKIE) + inv.countItem(dev.lifestages.registry.ModItems.CHOCOLATE_BUNNY)
+				+ inv.countItem(net.minecraft.world.item.Items.CAKE);
 	}
 
 	private static void check(boolean ok, String message) {

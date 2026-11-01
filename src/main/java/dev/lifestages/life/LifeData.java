@@ -64,6 +64,19 @@ public final class LifeData {
 	public boolean lookingForParent;
 	/** Starter chests already placed for this player's babies. Capped at the child limit. */
 	public int starterPacks;
+	// ---- pet cat ----
+	/** Which cat a pet is (0-10, see {@link Pets#VARIANTS}). */
+	public int petLook;
+	/** Who is walking this pet on a lead, or null. */
+	public UUID leashHolder;
+	/** The lead came from the pet's own inventory (it goes back to them when unclipped). */
+	public boolean leashFromPet;
+	/** A pet's sprint burst, in ticks left; it refills while not sprinting. */
+	public int dash = Pets.DASH_TICKS;
+	// ---- holidays ----
+	/** Halloween costume (0 none, 1-4), worn for the day it was picked. */
+	public int costume;
+	public long costumeDay = -1;
 
 	public Stage stage() {
 		return Stage.of(stage);
@@ -130,7 +143,7 @@ public final class LifeData {
 	/** Shown age in years. Rises through the stage range as the stage runs its course. */
 	public double age(double lengthMultiplier) {
 		Stage s = stage();
-		if (s == Stage.ELDERLY && lifespanTicks > 0) {
+		if (s.isFinal() && lifespanTicks > 0) {
 			double t = Math.min(1.0, stageTicks / Math.max(1.0, lifespanTicks + bonusTicks));
 			return s.startAge + (s.endAge - s.startAge) * t;
 		}
@@ -173,6 +186,9 @@ public final class LifeData {
 		momDead = false;
 		momLook = 0;
 		momDeathAge = 0;
+		leashHolder = null;
+		leashFromPet = false;
+		dash = Pets.DASH_TICKS;
 	}
 
 	public LifeData copy() {
@@ -216,6 +232,12 @@ public final class LifeData {
 		d.houseZ = houseZ;
 		d.houseStep = houseStep;
 		d.houseVersion = houseVersion;
+		d.petLook = petLook;
+		d.leashHolder = leashHolder;
+		d.leashFromPet = leashFromPet;
+		d.dash = dash;
+		d.costume = costume;
+		d.costumeDay = costumeDay;
 		return d;
 	}
 
@@ -295,14 +317,33 @@ public final class LifeData {
 		).apply(i, House::new));
 	}
 
+	private record Pet(int look, java.util.Optional<UUID> leash, boolean leashFromPet, int dash) {
+		static final Codec<Pet> CODEC = RecordCodecBuilder.create(i -> i.group(
+				Codec.INT.fieldOf("look").forGetter(Pet::look),
+				UUIDUtil.CODEC.optionalFieldOf("leash").forGetter(Pet::leash),
+				Codec.BOOL.optionalFieldOf("leash_from_pet", false).forGetter(Pet::leashFromPet),
+				Codec.INT.optionalFieldOf("dash", 0).forGetter(Pet::dash)
+		).apply(i, Pet::new));
+	}
+
+	private record Holiday(int costume, long costumeDay) {
+		static final Codec<Holiday> CODEC = RecordCodecBuilder.create(i -> i.group(
+				Codec.INT.fieldOf("costume").forGetter(Holiday::costume),
+				Codec.LONG.fieldOf("costume_day").forGetter(Holiday::costumeDay)
+		).apply(i, Holiday::new));
+	}
+
 	public static final Codec<LifeData> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Growth.CODEC.fieldOf("growth").forGetter(d -> new Growth(d.stage, d.stageTicks, d.milk, d.food, d.naps, d.nights, d.napTicks, d.lastNightDay)),
 			Body.CODEC.fieldOf("body").forGetter(d -> new Body(d.diaperDirty, d.diaperTicks, d.feedsSincePoop, d.sugarTicks, d.stinkyTicks, d.diaperOn, d.rumbleTicks, d.crashTicks)),
 			Fate.CODEC.fieldOf("fate").forGetter(d -> new Fate(d.started, d.pendingChoice, d.lastWasGhost, d.ghostTicks, d.lifespanTicks, d.bonusTicks, d.presents)),
 			Family.CODEC.fieldOf("family").forGetter(d -> new Family(d.parents, d.children, d.allowCarry, d.lookingForBaby, d.starterPacks, d.lookingForParent)),
 			Mom.CODEC.optionalFieldOf("mom", new Mom(false, 0, 0, false)).forGetter(d -> new Mom(d.momAssigned, d.momLook, d.momDeathAge, d.momDead)),
-			House.CODEC.optionalFieldOf("house", new House(0, 0, 0, 0, 0, 1)).forGetter(d -> new House(d.houseState, d.houseX, d.houseY, d.houseZ, d.houseStep, d.houseVersion))
-	).apply(i, (g, b, f, fam, mom, house) -> {
+			House.CODEC.optionalFieldOf("house", new House(0, 0, 0, 0, 0, 1)).forGetter(d -> new House(d.houseState, d.houseX, d.houseY, d.houseZ, d.houseStep, d.houseVersion)),
+			Pet.CODEC.optionalFieldOf("pet", new Pet(0, java.util.Optional.empty(), false, Pets.DASH_TICKS))
+					.forGetter(d -> new Pet(d.petLook, java.util.Optional.ofNullable(d.leashHolder), d.leashFromPet, d.dash)),
+			Holiday.CODEC.optionalFieldOf("holiday", new Holiday(0, -1)).forGetter(d -> new Holiday(d.costume, d.costumeDay))
+	).apply(i, (g, b, f, fam, mom, house, pet, holiday) -> {
 		LifeData d = new LifeData();
 		d.stage = g.stage;
 		d.stageTicks = g.stageTicks;
@@ -343,6 +384,12 @@ public final class LifeData {
 		d.houseZ = house.z;
 		d.houseStep = house.step;
 		d.houseVersion = house.version;
+		d.petLook = pet.look;
+		d.leashHolder = pet.leash.orElse(null);
+		d.leashFromPet = pet.leashFromPet;
+		d.dash = pet.dash;
+		d.costume = holiday.costume;
+		d.costumeDay = holiday.costumeDay;
 		return d;
 	}));
 }

@@ -3,7 +3,8 @@ package dev.lifestages.life;
 /**
  * The 11 life stages. Ages are in years; times are minutes at lifeLengthMultiplier 1.0.
  * minMinutes is the default stage length; completing the goals (milk bottles, food points, naps, nights) cuts it
- * by up to half. A nap may stand in for a night where noted.
+ * by up to half. A nap may stand in for a night where noted. Kitten, Cat and Old Cat are a pet cat's own life, after the
+ * human stages in the list; comparing a pet's stage with a person's ({@link #atMost}, {@link #atLeast}) is always false.
  */
 public enum Stage {
 	NEWBORN("Newborn", 0.0, 28 / 365.0, 6, 0.35, 0.10, 3, 3, 0, 4, 0, false),
@@ -16,7 +17,11 @@ public enum Stage {
 	ADULT("Adult", 25, 40, 40, 1.0, 1.0, 10, 0, 50, 0, 1, false),
 	MIDDLE_AGE("Middle Age", 40, 60, 40, 1.0, 1.0, 10, 0, 50, 0, 1, false),
 	SENIOR("Senior Citizen", 60, 65, 16, 1.0, 0.95, 9, 0, 30, 0, 1, true),
-	ELDERLY("Elderly", 65, 85, 30, 0.95, 0.85, 8, 0, 0, 0, 0, false);
+	ELDERLY("Elderly", 65, 85, 30, 0.95, 0.85, 8, 0, 0, 0, 0, false),
+	// A pet cat's life (cat years): fed milk bottles as a Kitten, fish as a Cat; the Old Cat's time is rolled like an Elder's.
+	KITTEN("Kitten", 0, 1, 15, 0.3, 1.0, 4, 4, 0, 2, 0, false),
+	CAT("Cat", 1, 12, 45, 0.4, 1.1, 5, 0, 30, 1, 1, false),
+	OLD_CAT("Old Cat", 12, 18, 30, 0.4, 0.95, 5, 0, 0, 0, 0, false);
 
 	public final String label;
 	public final double startAge, endAge;
@@ -49,15 +54,25 @@ public enum Stage {
 	}
 
 	public Stage next() {
-		return this == ELDERLY ? ELDERLY : values()[ordinal() + 1];
+		return isFinal() ? this : values()[ordinal() + 1];
+	}
+
+	/** The last stage of a life: Elderly, or an Old Cat. Its length is a rolled lifespan, and then the life ends. */
+	public boolean isFinal() {
+		return this == ELDERLY || this == OLD_CAT;
+	}
+
+	/** A pet cat: Kitten, Cat or Old Cat. */
+	public boolean isPet() {
+		return ordinal() >= KITTEN.ordinal();
 	}
 
 	public boolean atMost(Stage other) {
-		return ordinal() <= other.ordinal();
+		return ordinal() <= other.ordinal() && isPet() == other.isPet();
 	}
 
 	public boolean atLeast(Stage other) {
-		return ordinal() >= other.ordinal();
+		return ordinal() >= other.ordinal() && isPet() == other.isPet();
 	}
 
 	/** Can only lie, wriggle and roll over. */
@@ -75,9 +90,9 @@ public enum Stage {
 		return atMost(TODDLER) || this == ELDERLY;
 	}
 
-	/** Can use the emote wheel: Newborn to Preschooler. */
+	/** Can use the emote wheel: Newborn to Preschooler, and pets (meow, hiss, purr). */
 	public boolean hasEmotes() {
-		return atMost(PRESCHOOLER);
+		return atMost(PRESCHOOLER) || isPet();
 	}
 
 	/** Can pick up children: Teenager and older. */

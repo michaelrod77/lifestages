@@ -61,6 +61,12 @@ public final class Feeding {
 		if (s.isNewborn()) {
 			return InteractionResult.FAIL;
 		}
+		if (s.isPet() && stack.has(DataComponents.FOOD)) {
+			if (player instanceof ServerPlayer sp) {
+				sp.sendOverlayMessage(Component.literal("Cats can't feed themselves. Meow (Z) and someone will!").withStyle(ChatFormatting.GRAY));
+			}
+			return InteractionResult.FAIL;
+		}
 		if (stack.is(Items.SUGAR) && s.getsSugarRush() && s.atLeast(Stage.TODDLER)) {
 			if (player instanceof ServerPlayer sp) {
 				player.getFoodData().eat(1, 0.1f);
@@ -144,6 +150,9 @@ public final class Feeding {
 	/** UseEntityCallback: feeding a baby player a milk bottle or (past Newborn) any food, or a baby animal. */
 	public static InteractionResult onUseEntity(Player player, Level level, InteractionHand hand, Entity target) {
 		ItemStack stack = player.getItemInHand(hand);
+		if (target instanceof Player cat && Pets.isPet(cat) && (stack.is(ModItems.MILK_BOTTLE) || stack.is(net.minecraft.tags.ItemTags.FISHES))) {
+			return player instanceof ServerPlayer feeder && cat instanceof ServerPlayer pet ? Pets.feed(feeder, pet, stack) : InteractionResult.SUCCESS;
+		}
 		FoodProperties food = stack.get(DataComponents.FOOD);
 		if (!stack.is(ModItems.MILK_BOTTLE) && food != null && target instanceof ServerPlayer baby && player instanceof ServerPlayer feeder
 				&& !player.isShiftKeyDown()) {

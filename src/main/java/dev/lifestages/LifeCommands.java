@@ -63,6 +63,29 @@ public final class LifeCommands {
 									}
 									return players.size();
 								}))))
+				.then(Commands.literal("holiday")
+						.executes(LifeCommands::holidayInfo)
+						.then(Commands.literal("start").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+								.then(Commands.argument("holiday", StringArgumentType.word())
+										.suggests((c, b) -> SharedSuggestionProvider.suggest(java.util.List.of("easter", "halloween", "christmas"), b))
+										.executes(c -> {
+											String name = StringArgumentType.getString(c, "holiday").toLowerCase(Locale.ROOT);
+											int type = java.util.Arrays.asList(dev.lifestages.life.Holidays.NAMES).stream()
+													.map(n -> n.toLowerCase(Locale.ROOT)).toList().indexOf(name);
+											if (type < 1) {
+												c.getSource().sendFailure(Component.literal("Holidays: easter, halloween or christmas."));
+												return 0;
+											}
+											var server = c.getSource().getServer();
+											dev.lifestages.life.Holidays.start(server, dev.lifestages.life.Holidays.state(server), type);
+											return 1;
+										})))
+						.then(Commands.literal("end").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+								.executes(c -> {
+									var server = c.getSource().getServer();
+									dev.lifestages.life.Holidays.end(server, dev.lifestages.life.Holidays.state(server));
+									return 1;
+								})))
 				.then(Commands.literal("reload").requires(Commands.hasPermission(Commands.LEVEL_ADMINS))
 						.executes(c -> {
 							LifeConfig.load();
@@ -121,6 +144,17 @@ public final class LifeCommands {
 				+ "  Nights " + d.nights + "/" + s.nights + "  Time left " + minLeft + " min"
 				+ (d.diaperDirty ? "\nDiaper: dirty" : "");
 		c.getSource().sendSuccess(() -> Component.literal(text).withStyle(ChatFormatting.AQUA), false);
+		return 1;
+	}
+
+	private static int holidayInfo(com.mojang.brigadier.context.CommandContext<CommandSourceStack> c) {
+		var server = c.getSource().getServer();
+		var st = dev.lifestages.life.Holidays.state(server);
+		long days = st.nextDay() - dev.lifestages.life.Holidays.day(server);
+		String today = st.activeType() != 0 ? "Today is " + dev.lifestages.life.Holidays.NAMES[st.activeType()] + ". " : "";
+		String next = st.nextDay() < 0 ? "No holiday planned yet."
+				: "Next: " + dev.lifestages.life.Holidays.NAMES[st.nextType()] + (days <= 1 ? " tomorrow." : " in " + days + " days.");
+		c.getSource().sendSuccess(() -> Component.literal(today + next), false);
 		return 1;
 	}
 

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "half=lower": {
+      "model": "lifestages:block/christmas_tree_lower"
+    },
+    "half=upper": {
+      "model": "lifestages:block/christmas_tree_upper"
+    }
+  }
+}

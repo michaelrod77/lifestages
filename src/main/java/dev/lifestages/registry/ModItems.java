@@ -52,6 +52,10 @@ public final class ModItems {
 	public static final Item BABY_SPAWN_EGG = register("baby_spawn_egg", dev.lifestages.item.BabyEggItem::new,
 			new Item.Properties().stacksTo(16).rarity(Rarity.RARE));
 
+	/** An Easter treat (cocoa beans, milk and sugar). Sweet: little ones get a sugar rush. */
+	public static final Item CHOCOLATE_BUNNY = register("chocolate_bunny", Item::new, new Item.Properties()
+			.food(new FoodProperties(4, 0.4f, false)));
+
 	public static final ResourceKey<CreativeModeTab> TAB_KEY = ResourceKey.create(Registries.CREATIVE_MODE_TAB, LifeStages.id("life_stages"));
 
 	private ModItems() {
@@ -75,6 +79,7 @@ public final class ModItems {
 					out.accept(MEMORY_ORB);
 					out.accept(RATTLE);
 					out.accept(BABY_SPAWN_EGG);
+					out.accept(CHOCOLATE_BUNNY);
 					ModBlocks.addToTab(out);
 				})
 				.build());

@@ -33,6 +33,9 @@ import net.minecraft.world.level.storage.loot.LootTable;
 public class PresentBlockEntity extends RandomizableContainerBlockEntity {
 	public static final int SIZE = 4;
 	private NonNullList<ItemStack> items = NonNullList.withSize(SIZE, ItemStack.EMPTY);
+	/** A Christmas present under the tree is for one person: only they (or someone in creative) can open it. */
+	private java.util.UUID owner;
+	private String ownerName;
 
 	public PresentBlockEntity(BlockPos pos, BlockState state) {
 		super(ModBlocks.PRESENT_ENTITY, pos, state);
@@ -60,7 +63,19 @@ public class PresentBlockEntity extends RandomizableContainerBlockEntity {
 
 	@Override
 	protected Component getDefaultName() {
-		return Component.translatable("container.lifestages.present");
+		return ownerName != null ? Component.literal("Gift for " + ownerName) : Component.translatable("container.lifestages.present");
+	}
+
+	/** Labels this present for one person. */
+	public void giftFor(java.util.UUID id, String name) {
+		owner = id;
+		ownerName = name;
+		setChanged();
+	}
+
+	/** Who this present is for, or null if anyone may open it. */
+	public String ownerFor(Player player) {
+		return owner == null || owner.equals(player.getUUID()) || player.isCreative() ? null : ownerName;
 	}
 
 	@Override
@@ -115,6 +130,14 @@ public class PresentBlockEntity extends RandomizableContainerBlockEntity {
 		if (!tryLoadLootTable(input)) {
 			ContainerHelper.loadAllItems(input, items);
 		}
+		ownerName = input.getStringOr("GiftFor", "");
+		String id = input.getStringOr("GiftForId", "");
+		if (ownerName.isEmpty() || id.isEmpty()) {
+			ownerName = null;
+			owner = null;
+		} else {
+			owner = java.util.UUID.fromString(id);
+		}
 	}
 
 	@Override
@@ -122,6 +145,10 @@ public class PresentBlockEntity extends RandomizableContainerBlockEntity {
 		super.saveAdditional(output);
 		if (!trySaveLootTable(output)) {
 			ContainerHelper.saveAllItems(output, items, false);
+		}
+		if (owner != null) {
+			output.putString("GiftFor", ownerName);
+			output.putString("GiftForId", owner.toString());
 		}
 	}
 

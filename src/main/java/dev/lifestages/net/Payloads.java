@@ -65,6 +65,42 @@ public final class Payloads {
 		}
 	}
 
+	/** S2C: it's Halloween morning; show the costume picker. */
+	public record OpenCostumes(int count) implements CustomPacketPayload {
+		public static final Type<OpenCostumes> TYPE = typeOf("open_costumes");
+		public static final StreamCodec<RegistryFriendlyByteBuf, OpenCostumes> CODEC = StreamCodec.composite(
+				ByteBufCodecs.VAR_INT, OpenCostumes::count, OpenCostumes::new);
+
+		@Override
+		public Type<OpenCostumes> type() {
+			return TYPE;
+		}
+	}
+
+	/** C2S: the Halloween costume picked (0 for none). */
+	public record PickCostume(int costume) implements CustomPacketPayload {
+		public static final Type<PickCostume> TYPE = typeOf("pick_costume");
+		public static final StreamCodec<RegistryFriendlyByteBuf, PickCostume> CODEC = StreamCodec.composite(
+				ByteBufCodecs.VAR_INT, PickCostume::costume, PickCostume::new);
+
+		@Override
+		public Type<PickCostume> type() {
+			return TYPE;
+		}
+	}
+
+	/** S2C: today's holiday (0 none) and a line for the top of the screen. */
+	public record HolidayInfo(int holiday, String line) implements CustomPacketPayload {
+		public static final Type<HolidayInfo> TYPE = typeOf("holiday_info");
+		public static final StreamCodec<RegistryFriendlyByteBuf, HolidayInfo> CODEC = StreamCodec.composite(
+				ByteBufCodecs.VAR_INT, HolidayInfo::holiday, ByteBufCodecs.STRING_UTF8, HolidayInfo::line, HolidayInfo::new);
+
+		@Override
+		public Type<HolidayInfo> type() {
+			return TYPE;
+		}
+	}
+
 	public record CryArrow(int entityId) implements CustomPacketPayload {
 		public static final Type<CryArrow> TYPE = typeOf("cry_arrow");
 		public static final StreamCodec<RegistryFriendlyByteBuf, CryArrow> CODEC = StreamCodec.composite(

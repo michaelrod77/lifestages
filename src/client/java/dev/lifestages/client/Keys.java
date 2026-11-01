@@ -43,6 +43,18 @@ public final class Keys {
 			return;
 		}
 		LifeData d = Life.of(mc.player);
+		if (d.started && d.stage().isPet() && mc.player.isSprinting()) {
+			ClientLife.dash = Math.max(0, ClientLife.dash - 1);
+		} else if (ClientLife.dash < dev.lifestages.life.Pets.DASH_TICKS && mc.player.tickCount % 2 == 0) {
+			ClientLife.dash++;
+		}
+		if (ClientLife.costumePending && mc.gui.screen() == null) {
+			ClientLife.costumePending = false;
+			mc.setScreenAndShow(new dev.lifestages.client.screen.CostumeScreen());
+		}
+		if (mc.player.tickCount % 100 == 0) {
+			dev.lifestages.client.render.PetCats.tidy(mc);
+		}
 		while (EMOTES.consumeClick()) {
 			if (mc.gui.screen() == null && d.started && d.stage().hasEmotes() && !d.isGhost()) {
 				mc.setScreenAndShow(new EmoteWheelScreen(EMOTES));

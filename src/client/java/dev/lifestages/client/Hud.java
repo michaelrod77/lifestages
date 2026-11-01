@@ -37,10 +37,17 @@ public final class Hud {
 			label = s.label + " · " + (age < 1 ? (age < 28 / 365.0 ? (int) (age * 365) + " days" : (int) (age * 12) + " months") : "age " + (int) age);
 		}
 		g.centeredText(mc.font, label, cx, y, 0xFFF2E6C8);
-		if (!d.isGhost() && d.stage() != Stage.ELDERLY) {
+		boolean bar = !d.isGhost() && !d.stage().isFinal();
+		if (bar) {
 			drawGrowthBar(g, mc, d, cx, y + 12);
 		}
-		int line = y + (!d.isGhost() && d.stage() != Stage.ELDERLY ? 22 : 10);
+		int line = y + (bar ? 22 : 10);
+		line = drawPetLines(g, mc, d, cx, line);
+		if (ClientLife.holiday != 0 && !ClientLife.holidayLine.isEmpty()) {
+			int color = ClientLife.holiday == 1 ? 0xFFF7B8CF : ClientLife.holiday == 2 ? 0xFFF2A04A : 0xFF8FE0A0;
+			g.centeredText(mc.font, ClientLife.holidayLine, cx, line, color);
+			line += 10;
+		}
 		if (d.napTicks > 0) {
 			int pct = d.napTicks * 100 / LifeManager.NAP_TICKS;
 			g.centeredText(mc.font, "Zzz… napping " + pct + "%", cx, line, 0xFFB8D8F8);
@@ -60,6 +67,32 @@ public final class Hud {
 		}
 		drawCryArrow(g, mc, line + 2);
 		drawCareTips(g, mc, d, line + 14);
+	}
+
+	/** A pet's dash meter while it refills, and who is walking whom. */
+	private static int drawPetLines(GuiGraphicsExtractor g, Minecraft mc, LifeData d, int cx, int line) {
+		if (!d.isGhost() && d.stage().isPet()) {
+			if (ClientLife.dash < dev.lifestages.life.Pets.DASH_TICKS) {
+				int w = 60, filled = w * ClientLife.dash / dev.lifestages.life.Pets.DASH_TICKS;
+				g.text(mc.font, "Dash", cx - w / 2 - 26, line, 0xFFE8C07A);
+				g.fill(cx - w / 2, line + 1, cx + w / 2, line + 7, 0xFF5A6070);
+				g.fill(cx - w / 2, line + 1, cx - w / 2 + filled, line + 7, 0xFFE8C07A);
+				line += 10;
+			}
+			if (d.leashHolder != null) {
+				var holder = mc.level.getPlayerByUUID(d.leashHolder);
+				g.centeredText(mc.font, "On a walk" + (holder == null ? "" : " with " + holder.getName().getString()), cx, line, 0xFFE8D8F0);
+				line += 10;
+			}
+		}
+		for (var p : mc.level.players()) {
+			LifeData pd = Life.of(p);
+			if (p != mc.player && mc.player.getUUID().equals(pd.leashHolder)) {
+				g.centeredText(mc.font, "Walking " + p.getName().getString() + " · right-click them to unclip", cx, line, 0xFFE8D8F0);
+				line += 10;
+			}
+		}
+		return line;
 	}
 
 	/**

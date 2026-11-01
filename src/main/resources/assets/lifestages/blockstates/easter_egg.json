@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "design=0": {
+      "model": "lifestages:block/easter_egg_0"
+    },
+    "design=1": {
+      "model": "lifestages:block/easter_egg_1"
+    },
+    "design=2": {
+      "model": "lifestages:block/easter_egg_2"
+    },
+    "design=3": {
+      "model": "lifestages:block/easter_egg_3"
+    },
+    "design=4": {
+      "model": "lifestages:block/easter_egg_4"
+    },
+    "design=5": {
+      "model": "lifestages:block/easter_egg_5"
+    }
+  }
+}

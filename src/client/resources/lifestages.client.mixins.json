@@ -4,7 +4,10 @@
 	"compatibilityLevel": "JAVA_25",
 	"client": [
 		"PlayerModelMixin",
-		"NameTagMixin"
+		"NameTagMixin",
+		"CatAccessor",
+		"WalkAnimationAccessor",
+		"LevelExtractorMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

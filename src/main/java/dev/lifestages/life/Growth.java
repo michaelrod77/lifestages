@@ -23,7 +23,7 @@ public final class Growth {
 			return;
 		}
 		LifeData d = Life.of(player);
-		if (!d.started || d.isGhost() || d.stage() == Stage.ELDERLY) {
+		if (!d.started || d.isGhost() || d.stage().isFinal()) {
 			return;
 		}
 		int boost = LifeConfig.get().ticks(d.stage().minMinutes * ADVANCEMENT_BOOST);

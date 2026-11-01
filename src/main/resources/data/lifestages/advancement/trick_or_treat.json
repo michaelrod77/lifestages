@@ -1,0 +1,28 @@
+{
+  "display": {
+    "icon": {
+      "id": "minecraft:jack_o_lantern"
+    },
+    "title": {
+      "text": "Trick or Treat!"
+    },
+    "description": {
+      "text": "Visit 5 Trick-or-Treaters on Halloween."
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ],
+  "parent": "lifestages:root"
+}

@@ -314,6 +314,10 @@ public class MomEntity extends PathfinderMob {
 		if (selfRescue(level, child)) {
 			return;
 		}
+		if (d.stage().isPet()) {
+			petCare(level, child, d);
+			return;
+		}
 		if (d.stage().atLeast(Stage.TEENAGER)) {
 			atHome(level, child);
 			return;
@@ -431,6 +435,52 @@ public class MomEntity extends PathfinderMob {
 			} else if (!nightTime(level) && getNavigation().isDone() && random.nextInt(240) == 0) {
 				getNavigation().moveTo(home.getX() + random.nextInt(13) - 6 + 0.5, home.getY(), home.getZ() + random.nextInt(13) - 6 + 0.5, 0.6);
 			}
+		}
+	}
+
+	/** A pet cat in her care: she follows them about, sees off monsters, and feeds milk to a Kitten and fish to a Cat. */
+	private void petCare(ServerLevel level, ServerPlayer pet, LifeData d) {
+		Monster danger = threat(pet);
+		if (danger != null && !(danger instanceof Creeper)) {
+			setTarget(danger);
+		} else if (getTarget() != null && (!getTarget().isAlive() || getTarget().distanceToSqr(pet) > 16 * 16)) {
+			setTarget(null);
+		}
+		Stage s = d.stage();
+		if (ticksSinceFeed < 0) {
+			ticksSinceFeed = Math.max(0, feedInterval(s) - 30 * 20);
+		}
+		ticksSinceFeed++;
+		if (offhandTicks > 0 && --offhandTicks == 0) {
+			setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
+		}
+		boolean hungry = pet.getFoodData().getFoodLevel() < 14;
+		boolean due = (s.milk > d.milk || s.food > d.food) && ticksSinceFeed >= feedInterval(s);
+		boolean asked = cryRequested && hungry && ticksSinceFeed > 5 * 20;
+		if ((due || asked || hungry && ticksSinceFeed > 20 * 20) && getTarget() == null && pet.level() == level) {
+			if (distanceTo(pet) < 2.5) {
+				if (s == Stage.KITTEN) {
+					hold(new ItemStack(ModItems.MILK_BOTTLE));
+					say(pet, "Here's your milk, little one.");
+					Feeding.feedBottle(this, pet, null);
+				} else {
+					ItemStack fish = new ItemStack(random.nextBoolean() ? Items.COD : Items.SALMON);
+					hold(fish.copy());
+					say(pet, "Who wants a fish? You do!");
+					dev.lifestages.life.Pets.eatFish(pet, fish);
+				}
+				ticksSinceFeed = 0;
+				cryRequested = false;
+				cryTicks = 0;
+			} else {
+				getNavigation().moveTo(pet, 1.2);
+			}
+			return;
+		}
+		cryRequested = false;
+		cryTicks = 0;
+		if (getTarget() == null) {
+			follow(pet, 6.0);
 		}
 	}
 

@@ -2,6 +2,7 @@
 import math
 
 import baby_skins
+import holidays
 import nursery
 import presents
 
@@ -803,6 +804,7 @@ def all_textures():
         'mob_effect/stinky.png': stinky_effect(),
         **presents.textures(),
         **baby_skins.textures(),
+        **holidays.textures(),
     }
 
 

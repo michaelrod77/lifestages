@@ -85,11 +85,16 @@ public final class LifeManager {
 			player.getFoodData().addExhaustion(0.014f);
 		} else if (stage == Stage.TODDLER) {
 			player.getFoodData().addExhaustion(0.008f);
+		} else if (stage == Stage.KITTEN) {
+			player.getFoodData().addExhaustion(0.01f);
+		}
+		if (stage.isPet()) {
+			dirty |= Pets.tick(player, d);
 		}
 		dirty |= tickSleep(player, d, stage);
 		dirty |= Bodily.tick(player, d, stage);
 
-		if (stage == Stage.ELDERLY) {
+		if (stage.isFinal()) {
 			if (d.lifespanTicks <= 0) {
 				rollLifespan(player, d);
 				dirty = true;
@@ -131,7 +136,12 @@ public final class LifeManager {
 		player.level().playSound(null, player.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.8f, 1.2f);
 		player.sendSystemMessage(Component.literal("You are now a " + to.label + "!").withStyle(ChatFormatting.GOLD));
 		ModAdvancements.stageReached(player, to);
-		Birthdays.give(player, d, to);
+		if (to.isPet()) {
+			player.sendSystemMessage(Component.literal(to == Stage.CAT ? "No more milk: from now on it's fish, please!"
+					: "You're getting on a bit. Plenty of naps in sunny spots from now on.").withStyle(ChatFormatting.GRAY));
+		} else {
+			Birthdays.give(player, d, to);
+		}
 		Life.save(player, d);
 		if (to == Stage.CHILD) {
 			Moms.childGrewUp(player);
@@ -145,7 +155,7 @@ public final class LifeManager {
 	public static void setStage(ServerPlayer player, Stage stage) {
 		LifeData d = Life.of(player);
 		d.enterStage(stage);
-		if (stage == Stage.ELDERLY) {
+		if (stage.isFinal()) {
 			rollLifespan(player, d);
 		}
 		applyAttributes(player, d);
@@ -161,7 +171,8 @@ public final class LifeManager {
 	}
 
 	private static void dieOfOldAge(ServerPlayer player, LifeData d) {
-		int age = (int) Math.floor(65 + 20.0 * d.stageTicks / Math.max(1, d.lifespanTicks + d.bonusTicks));
+		Stage s = d.stage();
+		int age = (int) Math.floor(s.startAge + (s.endAge - s.startAge) * d.stageTicks / Math.max(1, d.lifespanTicks + d.bonusTicks));
 		ModAdvancements.award(player, "rest_in_peace");
 		WillChest.place(player, age);
 		var source = ModDamage.oldAge(player.level(), age);
@@ -238,7 +249,8 @@ public final class LifeManager {
 		if (!still || player.isSprinting()) {
 			return false;
 		}
-		return player.isSleeping() || Carrying.isCarried(player) || Cribs.isInCrib(player);
+		// a cat curls up anywhere (sneak to sit still)
+		return player.isSleeping() || Carrying.isCarried(player) || Cribs.isInCrib(player) || player.isShiftKeyDown() && Pets.isPet(player);
 	}
 
 	// ---- body ----
@@ -254,7 +266,9 @@ public final class LifeManager {
 		set(player, Attributes.MOVEMENT_SPEED, SPEED, speed - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		set(player, Attributes.MOVEMENT_SPEED, SUGAR, d.sugarTicks > 0 ? cfg.sugarRushSpeed - 1.0 : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		set(player, Attributes.MAX_HEALTH, HEALTH, s.hearts * 2 - 20, AttributeModifier.Operation.ADD_VALUE);
-		set(player, Attributes.JUMP_STRENGTH, JUMP, s.isBaby() ? -1.0 : s == Stage.TODDLER ? -0.3 : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		// Cats jump twice as high as a person (jump height grows with the square of the take-off speed: x1.41).
+		double jump = s.isBaby() ? -1.0 : s == Stage.TODDLER ? -0.3 : s == Stage.KITTEN ? 0.2 : s.isPet() ? 0.414 : 0.0;
+		set(player, Attributes.JUMP_STRENGTH, JUMP, jump, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		set(player, Attributes.BLOCK_BREAK_SPEED, MINING, s.atMost(Stage.TODDLER) ? -1.0 : s == Stage.PRESCHOOLER ? -0.5 : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		set(player, Attributes.ATTACK_DAMAGE, DAMAGE, s.isBaby() ? -1.0 : s == Stage.CHILD ? -0.25 : 0.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 		if (player.getHealth() > player.getMaxHealth()) {

@@ -59,6 +59,11 @@ public class PresentBlock extends BaseEntityBlock implements BabySafe {
 	@Override
 	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
 		if (!level.isClientSide() && level.getBlockEntity(pos) instanceof PresentBlockEntity present) {
+			String forWhom = present.ownerFor(player);
+			if (forWhom != null && player instanceof net.minecraft.server.level.ServerPlayer sp) {
+				sp.sendOverlayMessage(net.minecraft.network.chat.Component.literal("This present is for " + forWhom + ".").withStyle(net.minecraft.ChatFormatting.GOLD));
+				return InteractionResult.SUCCESS;
+			}
 			player.openMenu(present);
 		}
 		return InteractionResult.SUCCESS;
